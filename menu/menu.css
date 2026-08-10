@@ -1,0 +1,47 @@
+#title{
+    margin: auto;
+}
+
+.navbar {
+    display: flex;
+    gap: 50px;
+    background-color: hsla(0, 0%, 16%, 0.657);
+    padding: 10px
+}
+
+.nav-item {
+    position: relative;
+    color: #aaaaaa;
+    text-decoration: none;
+    font-size: 24px;
+    padding: 10px 0;
+}
+
+/* Hover effect */
+.nav-item:hover {
+    color: white;
+}
+
+/* The underline */
+.nav-item::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -10px;
+
+    width: 0;
+    height: 3px;
+
+    background-color: white;
+
+    transition: width 0.25s ease;
+}
+
+/* Active page */
+.nav-item.active {
+    color: white;
+}
+
+.nav-item.active::after {
+    width: 100%;
+}
