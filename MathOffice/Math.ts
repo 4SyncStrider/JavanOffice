@@ -15,10 +15,12 @@ export class MathUtils {
         return a * 100000;
     }
 
-    static roundingToNearestSignificantFigures(a:number, b:number){
+    // static roundingToNearestSignificantFigures(a:number, b:number){
 
-    }
+    // }
 
     static Pi = Math.PI;
+
+    static e =  Math.E;
 
 }
