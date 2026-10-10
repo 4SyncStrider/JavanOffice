@@ -1,0 +1,194 @@
+:root {
+  --page-bg: #2f8b5c;
+  --panel-bg: #0b2b1c;
+  --panel-alt: #1a352a;
+  --surface: rgba(255,255,255,0.04);
+  --primary: #7be3ff;
+  --text: #edf6f1;
+  --muted: rgba(255,255,255,0.74);
+  --border: rgba(255,255,255,0.12);
+  --danger: #ff8b88;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--page-bg);
+  color: var(--text);
+  font-family: "Source Code Pro", "Segoe UI", sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  padding: 28px 18px 40px;
+}
+
+button, select, input {
+  font: inherit;
+}
+
+.tool-shell {
+  width: min(1100px, 100%);
+}
+
+.tool-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.back-link {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.header-copy h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  letter-spacing: 0.16em;
+  font-size: 0.72rem;
+  color: var(--primary);
+}
+
+.math-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.1fr) minmax(300px, 0.9fr);
+  gap: 18px;
+}
+
+.panel {
+  background: rgba(11, 43, 28, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: 0 18px 24px rgba(0,0,0,0.16);
+}
+
+.panel h2, .formula-result-box h3 {
+  margin-top: 0;
+}
+
+.calc-display {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  min-height: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 16px;
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  word-break: break-all;
+  margin-bottom: 16px;
+}
+
+.calc-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.calc-buttons button {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+  border-radius: 12px;
+  min-height: 52px;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.calc-buttons button[data-action="clear"] {
+  background: rgba(255, 139, 136, 0.12);
+}
+
+.calc-buttons button[data-action="equals"] {
+  background: var(--primary);
+  color: #08251c;
+  font-weight: 700;
+}
+
+.calculate-formula-button {
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(123, 227, 255, 0.14);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.wide {
+  grid-column: span 2;
+}
+
+.wide-span {
+  grid-column: span 4;
+}
+
+.field-label {
+  display: block;
+  margin: 12px 0 8px;
+  color: var(--muted);
+}
+
+select, .formula-inputs input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--text);
+}
+
+.formula-inputs {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.formula-inputs label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.formula-result-box {
+  margin-top: 18px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.formula-text {
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+
+.answer-text {
+  margin: 0;
+  font-size: clamp(1.1rem, 2vw, 1.7rem);
+  font-weight: 700;
+}
+
+@media (max-width: 780px) {
+  .math-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
