@@ -1,5 +1,3 @@
-Information/
-
 
 
 .gitignore
@@ -9,3 +7,5 @@ Information/
 node_modules/
 
 npmPackages/
+
+Information/

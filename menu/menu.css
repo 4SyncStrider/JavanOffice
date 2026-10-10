@@ -1,194 +1,191 @@
-
-header{
-    text-align: center;
-    text-decoration: underline;
+:root {
+  --page-bg: #2f8b5c;
+  --panel-bg: #0b2b1c;
+  --panel-alt: #304b3d;
+  --panel-inner: #193a2b;
+  --border-soft: rgba(255, 255, 255, 0.12);
+  --text-main: #f3f7f5;
+  --text-muted: rgba(255, 255, 255, 0.78);
+  --highlight: #7af3ff;
 }
+
+* {
+  box-sizing: border-box;
+}
+
 html, body {
-    background-color: seagreen;
+  margin: 0;
+  min-height: 100%;
+  background: var(--page-bg);
+  color: var(--text-main);
+  font-family: "Source Code Pro", "Segoe UI", sans-serif;
 }
+
 body {
-    background-color: hsla(0, 0%, 0%, 0.702);
-    font-family: "Source Code Pro", Verdana, Geneva, Tahoma, sans-serif;
-    font-size: larger;
-    overflow: auto;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 32px 18px 42px;
 }
 
-
-section {
-    box-shadow: 1px 1px 1px hsla(0, 0%, 50%, 0.625);
-    border-radius: 45px;
-    border: thick, black;
+.page-shell {
+  width: min(1100px, 100%);
 }
 
+.masthead {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  color: var(--highlight);
+  font-weight: 700;
+}
 
 #FadeinTitle {
-    font-size: 60px;
-    font-weight: bold;
-    text-align: center;
-
-    /* ===== Multi-colour Placeholder ===== */
-    background: linear-gradient(
-        90deg,
-        Blue,
-        cyan,
-        purple
-    );
-
-    background-clip: text;
-    -webkit-background-clip: text;
-
-    color: transparent;
-    -webkit-text-fill-color: transparent;
-
-    /* Fade in when page loads */
-    opacity: 0;
-    animation: fadeIn 1.5s ease forwards;
-}
-
-
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px); /* Optional: starts slightly lower */
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800;
+  text-align: center;
+  background: linear-gradient(90deg, #58d0ff, #a7ffec 40%, #7cb3ff 75%, #d1d7ff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-decoration: underline;
+  text-underline-offset: 8px;
+  opacity: 0;
+  animation: fadeIn 1.2s ease forwards;
 }
 
 h2 {
-    font-size: 40px;
-    color: white;
-    text-decoration: underline;
+  margin: 14px 0 0;
+  font-size: clamp(1.1rem, 2.2vw, 2.1rem);
+  color: var(--text-main);
+  text-decoration: underline;
+  text-underline-offset: 6px;
 }
 
+.menu-grid {
+  display: grid;
+  gap: 28px;
+}
+
+.menu-panel {
+  background: rgba(11, 43, 28, 0.92);
+  border: 1px solid var(--border-soft);
+  border-radius: 28px;
+  box-shadow: 0 18px 32px rgba(0, 0, 0, 0.18);
+  padding: 22px 18px 26px;
+}
+
+.menu-panel h3 {
+  margin: 0 0 18px;
+  text-align: center;
+  color: var(--text-main);
+  font-size: clamp(1.3rem, 2vw, 2rem);
+}
 
 .dock-container {
-  /* Enables 3D space rendering */
-  perspective: 1000px; 
-  padding-bottom: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .dock {
-  display: flex;
   list-style: none;
-  padding: 10px 40px;
+  padding: 18px 24px;
   margin: 0;
-  gap: 40px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 50px;
-  border: 34px solid rgba(255, 255, 255, 0.1);
-  
-  /* Rotates the dock slightly backward to create the horizon curve */
-  transform: rotateX(25deg);
-  transform-style: preserve-3d;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 32px;
 }
 
 .dock li {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  cursor: pointer;
-}
-
-.game-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: inherit;
-  text-decoration: none;
-}
-
-.game-link:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 6px;
-  border-radius: 8px;
-}
-
-.dock .icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 24px;
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-/* Subtle label below the icon */
-.dock li span {
-  font-family: sans-serif;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
-  margin-top: 8px;
-  pointer-events: none;
-}
-
-.dock li:hover .icon {
-  transform: scale(1.2) translateY(-10px);
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.dock1{
-  display: flex;
   list-style: none;
-  padding: 10px 40px;
-  margin: 0;
-  gap: 40px;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border-radius: 50px;
-  border: 34px solid rgba(255, 255, 255, 0.1);
-  
-  /* Rotates the dock slightly backward to create the horizon curve */
-  transform: rotateX(25deg);
-  transform-style: preserve-3d;
 }
 
-.dock1 li {
+.nav-link {
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
-  cursor: pointer;
+  justify-content: center;
+  min-width: 120px;
+  gap: 8px;
+  padding: 14px 10px 12px;
+  color: var(--text-main);
+  text-decoration: none;
+  border-radius: 18px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
-.dock1 .icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+.nav-link:hover,
+.nav-link:focus-visible {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.14);
+  outline: none;
+}
+
+.nav-link .icon {
+  width: 64px;
+  height: 64px;
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 24px;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  line-height: 1;
   transition: transform 0.2s ease, background 0.2s ease;
 }
 
-/* Subtle label below the icon */
-.dock1 li span {
-  font-family: sans-serif;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
-  margin-top: 8px;
-  pointer-events: none;
+.nav-link:hover .icon,
+.nav-link:focus-visible .icon {
+  transform: scale(1.12);
+  background: rgba(122, 243, 255, 0.12);
 }
 
-.dock1 li:hover .icon {
-  transform: scale(1.2) translateY(-10px);
-  background: rgba(255, 255, 255, 0.2);
+.nav-link span:last-child {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  text-align: center;
 }
 
-li{
-  color: white;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 620px) {
+  body {
+    padding-inline: 12px;
+  }
+
+  .menu-panel {
+    padding: 18px 12px 20px;
+  }
+
+  .dock {
+    gap: 16px;
+    padding: 14px 12px;
+  }
+
+  .nav-link {
+    min-width: 94px;
+  }
 }

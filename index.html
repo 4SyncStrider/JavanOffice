@@ -1,66 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="menu/menu.css">
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">  
-    <title>JavanOffice</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="menu/menu.css">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+  <title>JavanOffice</title>
 </head>
 <body>
-    <header>
-        <h1 id="FadeinTitle" style="text-decoration: underline; color: white">Welcome to JavanOffice</h1>
-        <h2>Feel free to use the tools and Games here</h2>
+  <div class="page-shell">
+    <header class="masthead">
+      <p class="eyebrow">JAVANOFFICE</p>
+      <h1 id="FadeinTitle">Welcome to JavanOffice</h1>
+      <h2>Feel free to use the tools and Games here</h2>
     </header>
-    <br>
-    <section id="tools">
-        <h1 style="text-align: center; color: white;">Tools:</h1>
+
+    <main class="menu-grid">
+      <section id="tools" class="menu-panel">
+        <h3>Tools</h3>
         <div class="dock-container">
           <ul class="dock">
-        <li>
-          <div class="icon" id="todo">📃</div>
-          <span>To-do list</span>
-        </li>
-        <li>
-          <div class="icon" id="华">简繁</div>
-          <span>Chinese writing convertor</span>
-        </li>
-        <li>
-          <div class="icon" id="math">+</div>
-          <span>Maths</span>
-        </li>
+            <li>
+              <a class="nav-link" href="Tools/to-do/index.html">
+                <span class="icon" aria-hidden="true">📃</span>
+                <span>To-do list</span>
+              </a>
+            </li>
+            <li>
+              <a class="nav-link" href="Tools/简体繁体/index.html">
+                <span class="icon" aria-hidden="true">简</span>
+                <span>简繁转换</span>
+              </a>
+            </li>
+            <li>
+              <a class="nav-link" href="Tools/Math_formula_properties/index.html">
+                <span class="icon" aria-hidden="true">＋</span>
+                <span>Calculator</span>
+              </a>
+            </li>
           </ul>
         </div>
-    </section>
-    <br>
-    <section id="games">
-        <h1 style="text-align: center; color: white;">Games:</h1>
+      </section>
+
+      <section id="games" class="menu-panel">
+        <h3>Games</h3>
         <div class="dock-container">
           <ul class="dock">
-        <li>
-          <a class="game-link" id="Flappy-bird" href="GAmes/Flappy-bird/index.html">
-            <span class="icon" aria-hidden="true">🐤</span>
-            <span>Flappy Bird</span>
-          </a>
-        </li>
-        <li>
-          <a class="game-link" id="Chess" href="GAmes/Chess/index.html">
-            <span class="icon" aria-hidden="true">♟️</span>
-            <span>Chess</span>
-          </a>
-        </li>
-        <li>
-          <a class="game-link" id="Dino" href="GAmes/Google_dino/index.html">
-            <span class="icon" aria-hidden="true">🦖</span>
-            <span>Google Dino</span>
-          </a>
-        </li>
+            <li>
+              <a class="nav-link game-link" id="Flappy-bird" href="GAmes/Flappy-bird/index.html">
+                <span class="icon" aria-hidden="true">🐤</span>
+                <span>Flappy Bird</span>
+              </a>
+            </li>
+            <li>
+              <a class="nav-link game-link" id="Chess" href="GAmes/Chess/index.html">
+                <span class="icon" aria-hidden="true">♟️</span>
+                <span>Chess</span>
+              </a>
+            </li>
+            <li>
+              <a class="nav-link game-link" id="Dino" href="GAmes/Google_dino/index.html">
+                <span class="icon" aria-hidden="true">🦖</span>
+                <span>Google Dino</span>
+              </a>
+            </li>
           </ul>
         </div>
-    </section>
-    <script type="module" src="menu/menu.js"></script>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="menu/menu.js"></script>
 </body>
 </html>
