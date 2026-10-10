@@ -9,10 +9,11 @@
 <body>
   <!-- The page is intentionally split into a small header, board, controls, and modal layer. -->
   <main class="app-shell">
+    <a class="menu-link" href="../../index.html">← Main menu</a>
     <header class="game-header">
       <p class="eyebrow">LOCAL TWO-PLAYER GAME</p>
-      <h1>CHESS</h1>
-      <p id="turnStatus" class="turn-status" aria-live="polite">WHITE TO MOVE</p>
+      <h1 id="gameTitle">ENGLISH CHESS ♟️</h1>
+      <p id="turnStatus" class="turn-status" aria-live="polite">WHITE TO START</p>
     </header>
 
     <!-- The table is the actual board; the surrounding assembly owns notation and rotation. -->
@@ -29,11 +30,13 @@
           <span>a</span><span>b</span><span>c</span><span>d</span>
           <span>e</span><span>f</span><span>g</span><span>h</span>
         </div>
+        <span id="riverLabel" hidden aria-hidden="true">楚河　汉界</span>
       </div>
     </section>
 
     <div class="controls">
-      <button id="resetButton" class="button" type="button">RESET GAME</button>
+      <button id="switchVariantButton" class="button" type="button">Switch to Chinese Chess</button>
+      <button id="resetButton" class="button" type="button">NEW GAME</button>
       <p id="message" class="message" aria-live="polite">Select a piece to see legal moves.</p>
     </div>
   </main>
@@ -53,9 +56,23 @@
       <h2 id="gameOverTitle">CHECKMATE</h2>
       <p id="gameOverResult" class="game-over-result">WHITE WINS</p>
       <button id="modalResetButton" class="button" type="button">RESET GAME</button>
+      <button id="gameOverSwitchButton" class="button" type="button">Switch Variant</button>
     </div>
   </div>
 
+  <div id="variantConfirmModal" class="modal" hidden>
+    <section class="modal-content" role="dialog" aria-modal="true" aria-labelledby="variantConfirmTitle" aria-describedby="variantConfirmMessage">
+      <p class="eyebrow">CHANGE GAME</p>
+      <h2 id="variantConfirmTitle">Switch game?</h2>
+      <p id="variantConfirmMessage"></p>
+      <div class="dialog-actions">
+        <button id="cancelVariantButton" class="button" type="button">Cancel</button>
+        <button id="confirmVariantButton" class="button" type="button">Switch Game</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="xiangqi.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

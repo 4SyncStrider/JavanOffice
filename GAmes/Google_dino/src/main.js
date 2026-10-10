@@ -20,6 +20,10 @@
   },
 };
 
-new Phaser.Game(config);
+const dinoGame = new Phaser.Game(config);
+
+window.addEventListener("pagehide", event => {
+  if (!event.persisted) dinoGame.destroy(true);
+}, { once: true });
 
 

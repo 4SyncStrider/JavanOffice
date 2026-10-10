@@ -16,7 +16,7 @@ const PIECE_STYLE = "emoji";
 // PIECES AND GAME STATE
 // ================================
 const PIECES = {
-  emoji: { w: { k: "♔", q: "♕", r: "♖", b: "♗", n: "♘", p: "♙" }, b: { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "" } },
+  emoji: { w: { k: "♔", q: "♕", r: "♖", b: "♗", n: "♘", p: "♙" }, b: { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" } },
   letter: { w: { k: "K", q: "Q", r: "R", b: "B", n: "N", p: "P" }, b: { k: "k", q: "q", r: "r", b: "b", n: "n", p: "p" } }
 };
 const FILES = "abcdefgh";
@@ -31,6 +31,7 @@ const state = {
   legalMoves: [],
   enPassant: null,
   gameOver: false,
+  matchStatus: "notStarted",
   pendingPromotion: null
 };
 
@@ -42,6 +43,24 @@ const message = document.querySelector("#message");
 const promotionModal = document.querySelector("#promotionModal");
 const promotionChoices = document.querySelector("#promotionChoices");
 const gameOverModal = document.querySelector("#gameOverModal");
+const gameTitle = document.querySelector("#gameTitle");
+const switchVariantButton = document.querySelector("#switchVariantButton");
+const variantConfirmModal = document.querySelector("#variantConfirmModal");
+const variantConfirmTitle = document.querySelector("#variantConfirmTitle");
+const variantConfirmMessage = document.querySelector("#variantConfirmMessage");
+const cancelVariantButton = document.querySelector("#cancelVariantButton");
+const confirmVariantButton = document.querySelector("#confirmVariantButton");
+const riverLabel = document.querySelector("#riverLabel");
+const XIANGQI_PIECES = {
+  red: { k: "帥", a: "仕", e: "相", h: "傌", r: "俥", c: "砲", s: "兵" },
+  black: { k: "將", a: "士", e: "象", h: "馬", r: "車", c: "炮", s: "卒" }
+};
+let activeVariant = "english";
+let xiangqiState = XiangqiEngine.createInitialState();
+let xiangqiMatchStatus = "notStarted";
+let xiangqiSelected = null;
+let xiangqiLegalMoves = [];
+let pendingVariant = null;
 
 function createPiece(color, type, moved = false) {
   return { color, type, moved };
@@ -99,6 +118,9 @@ function createStartingBoard() {
 // assembly for Black, while piece and label text are rotated back upright.
 function renderBoard() {
   boardBody.innerHTML = "";
+  boardElement.classList.remove("xiangqi-mode");
+  boardAssembly.classList.remove("xiangqi-view");
+  riverLabel.hidden = true;
   const checkedKing = findKing(state.board, state.turn);
   for (let row = 0; row < 8; row += 1) {
     const tableRow = document.createElement("tr");
@@ -127,15 +149,106 @@ function renderBoard() {
   }
   boardAssembly.classList.toggle("black-view", state.turn === "b");
   boardAssembly.classList.toggle("white-view", state.turn === "w");
-  turnStatus.textContent = state.gameOver ? "GAME OVER" : `${state.turn === "w" ? "WHITE" : "BLACK"} TO MOVE`;
+  const colorName = state.turn === "w" ? "WHITE" : "BLACK";
+  turnStatus.textContent = state.gameOver ? "GAME OVER" : `${colorName} TO ${state.matchStatus === "notStarted" ? "START" : "MOVE"}`;
+}
+
+function renderXiangqiBoard() {
+  boardBody.innerHTML = "";
+  boardElement.classList.add("xiangqi-mode");
+  boardAssembly.classList.remove("black-view", "white-view");
+  boardAssembly.classList.add("xiangqi-view");
+  riverLabel.hidden = false;
+  const checked = XiangqiEngine.isInCheck(xiangqiState, xiangqiState.turn);
+  for (let row = 0; row < 10; row += 1) {
+    const tableRow = document.createElement("tr");
+    for (let col = 0; col < 9; col += 1) {
+      const cell = document.createElement("td");
+      const piece = xiangqiState.board[row][col];
+      const destination = xiangqiLegalMoves.find(move => move.row === row && move.col === col);
+      cell.dataset.row = row;
+      cell.dataset.col = col;
+      cell.setAttribute("aria-label", piece ? `${piece.color} ${XIANGQI_PIECES[piece.color][piece.type]}, row ${10 - row}, file ${col + 1}` : `Xiangqi square, row ${10 - row}, file ${col + 1}`);
+      if (xiangqiSelected?.row === row && xiangqiSelected?.col === col) cell.classList.add("selected");
+      if (destination) cell.classList.add(xiangqiState.board[row][col] ? "capture-move" : "legal-move");
+      if (checked && piece?.color === xiangqiState.turn && piece.type === "k") cell.classList.add("in-check");
+
+      const palaceRow = row < 3 ? row : row > 6 ? row - 7 : -1;
+      if (palaceRow >= 0) {
+        const palaceCol = col - 3;
+        if ((palaceRow === 0 && palaceCol === 0) || (palaceRow === 1 && palaceCol === 1)) cell.classList.add("palace-down-right");
+        if ((palaceRow === 0 && palaceCol === 1) || (palaceRow === 1 && palaceCol === 0)) cell.classList.add("palace-down-left");
+      }
+
+      if (piece) {
+        const pieceElement = document.createElement("span");
+        pieceElement.className = `piece xiangqi-piece ${piece.color}`;
+        pieceElement.textContent = XIANGQI_PIECES[piece.color][piece.type];
+        pieceElement.setAttribute("aria-hidden", "true");
+        cell.appendChild(pieceElement);
+      }
+      cell.addEventListener("click", () => handleSquareClick(row, col));
+      tableRow.appendChild(cell);
+    }
+    boardBody.appendChild(tableRow);
+  }
+
+  const colorName = xiangqiState.turn === "red" ? "RED" : "BLACK";
+  turnStatus.textContent = `${colorName} TO ${xiangqiMatchStatus === "notStarted" ? "START" : "MOVE"}${checked ? " · CHECK" : ""}`;
+}
+
+function handleXiangqiSquareClick(row, col) {
+  if (xiangqiMatchStatus === "completed") return;
+  const piece = xiangqiState.board[row][col];
+  const selectedMove = xiangqiLegalMoves.find(move => move.row === row && move.col === col);
+  if (selectedMove && xiangqiSelected) {
+    const captured = xiangqiState.board[row][col];
+    const mover = xiangqiState.turn === "red" ? "Red" : "Black";
+    XiangqiEngine.move(xiangqiState, xiangqiSelected.row, xiangqiSelected.col, row, col);
+    xiangqiMatchStatus = "inProgress";
+    xiangqiSelected = null;
+    xiangqiLegalMoves = [];
+    message.textContent = captured ? `${mover} captured ${XIANGQI_PIECES[captured.color][captured.type]}.` : `${mover} moved.`;
+    evaluateXiangqiGameEnd();
+    renderXiangqiBoard();
+    return;
+  }
+  if (piece?.color === xiangqiState.turn) {
+    xiangqiMatchStatus = "inProgress";
+    xiangqiSelected = { row, col };
+    xiangqiLegalMoves = XiangqiEngine.getLegalMoves(xiangqiState, row, col);
+    message.textContent = xiangqiLegalMoves.length ? "Choose a highlighted destination." : "That piece has no legal moves.";
+  } else {
+    xiangqiSelected = null;
+    xiangqiLegalMoves = [];
+    message.textContent = "Select one of your pieces.";
+  }
+  renderXiangqiBoard();
+}
+
+function evaluateXiangqiGameEnd() {
+  const result = XiangqiEngine.getGameResult(xiangqiState);
+  if (result.finished) {
+    xiangqiMatchStatus = "completed";
+    document.querySelector("#gameOverTitle").textContent = result.inCheck ? "CHECKMATE" : "NO LEGAL MOVES";
+    document.querySelector("#gameOverResult").textContent = `${result.winner === "red" ? "RED" : "BLACK"} WINS`;
+    gameOverModal.hidden = false;
+  } else if (result.inCheck) {
+    message.textContent = `${xiangqiState.turn === "red" ? "Red" : "Black"} is in check.`;
+  }
 }
 
 function handleSquareClick(row, col) {
+  if (activeVariant === "xiangqi") {
+    handleXiangqiSquareClick(row, col);
+    return;
+  }
   if (state.gameOver || state.pendingPromotion) return;
   const clickedPiece = state.board[row][col];
   const selectedMove = state.legalMoves.find(move => move.row === row && move.col === col);
   if (selectedMove) { executeMove(selectedMove); return; }
   if (clickedPiece && clickedPiece.color === state.turn) {
+    state.matchStatus = "inProgress";
     state.selected = { row, col };
     state.legalMoves = getLegalMoves(state, row, col);
     message.textContent = state.legalMoves.length ? "Choose a highlighted destination." : "That piece has no legal moves.";
@@ -413,6 +526,7 @@ function evaluateGameEnd() {
   if (legalMoves.length) return;
   state.gameOver = true;
   const inCheck = isInCheck(state.board, state.turn);
+  state.matchStatus = "completed";
   document.querySelector("#gameOverTitle").textContent = inCheck ? "CHECKMATE" : "STALEMATE";
   document.querySelector("#gameOverResult").textContent = inCheck ? `${state.turn === "w" ? "BLACK" : "WHITE"} WINS` : "DRAW";
   gameOverModal.hidden = false;
@@ -427,6 +541,7 @@ function resetGame() {
   state.legalMoves = [];
   state.enPassant = null;
   state.gameOver = false;
+  state.matchStatus = "notStarted";
   state.pendingPromotion = null;
   promotionModal.hidden = true;
   gameOverModal.hidden = true;
@@ -434,6 +549,100 @@ function resetGame() {
   renderBoard();
 }
 
-document.querySelector("#resetButton").addEventListener("click", resetGame);
-document.querySelector("#modalResetButton").addEventListener("click", resetGame);
+function updateVariantInterface() {
+  const isEnglish = activeVariant === "english";
+  gameTitle.textContent = isEnglish ? "ENGLISH CHESS ♟️" : "CHINESE CHESS · 中国象棋";
+  document.title = isEnglish ? "English Chess | JavanOffice" : "Chinese Chess | JavanOffice";
+  switchVariantButton.textContent = isEnglish ? "Switch to Chinese Chess" : "Switch to English Chess";
+  boardElement.setAttribute("aria-label", isEnglish ? "English chess board" : "Chinese chess board");
+}
+
+function startNewGame() {
+  if (activeVariant === "english") {
+    resetGame();
+    state.matchStatus = "inProgress";
+    message.textContent = "White to move.";
+    renderBoard();
+    return;
+  }
+  xiangqiState = XiangqiEngine.createInitialState();
+  xiangqiMatchStatus = "inProgress";
+  xiangqiSelected = null;
+  xiangqiLegalMoves = [];
+  promotionModal.hidden = true;
+  gameOverModal.hidden = true;
+  message.textContent = "Red to move.";
+  renderXiangqiBoard();
+}
+
+function switchVariant(variant) {
+  activeVariant = variant;
+  resetGame();
+  xiangqiState = XiangqiEngine.createInitialState();
+  xiangqiMatchStatus = "notStarted";
+  xiangqiSelected = null;
+  xiangqiLegalMoves = [];
+  updateVariantInterface();
+  if (activeVariant === "xiangqi") renderXiangqiBoard();
+}
+
+function closeVariantConfirmation(returnFocus = true) {
+  variantConfirmModal.hidden = true;
+  pendingVariant = null;
+  document.removeEventListener("keydown", handleVariantDialogKeydown);
+  if (returnFocus) switchVariantButton.focus();
+}
+
+function handleVariantDialogKeydown(event) {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeVariantConfirmation();
+    return;
+  }
+  if (event.key === "Tab") {
+    const focusedElement = document.activeElement;
+    event.preventDefault();
+    const nextButton = event.shiftKey
+      ? (focusedElement === cancelVariantButton ? confirmVariantButton : cancelVariantButton)
+      : (focusedElement === confirmVariantButton ? cancelVariantButton : confirmVariantButton);
+    nextButton.focus();
+  }
+}
+
+function requestVariantSwitch() {
+  if (!variantConfirmModal.hidden) return;
+  const target = activeVariant === "english" ? "xiangqi" : "english";
+  const matchStatus = activeVariant === "english" ? state.matchStatus : xiangqiMatchStatus;
+  if (matchStatus !== "inProgress") {
+    switchVariant(target);
+    return;
+  }
+
+  const targetName = target === "english" ? "English Chess" : "Chinese Chess";
+  const currentName = activeVariant === "english" ? "An English Chess" : "A Chinese Chess";
+  pendingVariant = target;
+  variantConfirmTitle.textContent = `Switch to ${targetName}?`;
+  variantConfirmMessage.textContent = `${currentName} match is currently in progress. Switching games will end the current match and discard its current board position. Do you want to continue?`;
+  variantConfirmModal.hidden = false;
+  cancelVariantButton.focus();
+  document.addEventListener("keydown", handleVariantDialogKeydown);
+}
+
+document.querySelector("#resetButton").addEventListener("click", startNewGame);
+document.querySelector("#modalResetButton").addEventListener("click", startNewGame);
+document.querySelector("#gameOverSwitchButton").addEventListener("click", requestVariantSwitch);
+switchVariantButton.addEventListener("click", requestVariantSwitch);
+cancelVariantButton.addEventListener("click", () => closeVariantConfirmation());
+confirmVariantButton.addEventListener("click", () => {
+  if (!pendingVariant) return;
+  const target = pendingVariant;
+  closeVariantConfirmation(false);
+  switchVariant(target);
+  switchVariantButton.focus();
+});
+variantConfirmModal.addEventListener("click", event => {
+  if (event.target === variantConfirmModal) closeVariantConfirmation();
+});
+
+updateVariantInterface();
 resetGame();

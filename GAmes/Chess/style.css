@@ -2,24 +2,22 @@
    PAGE BACKGROUND PLACEHOLDER
    ======================================== */
 body {
-  
-  background-image: url("images/Background-image.jpg");
+  background-image: linear-gradient(rgba(11, 43, 28, .88), rgba(11, 43, 28, .94)), url("images/Background-image.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  
 }
 
 :root {
-  --ink: #16251f;
-  --muted: #5b6c64;
-  --paper: #f5f3ea;
-  --panel: #fffdf7;
-  --light-square: white;
-  --dark-square: seagreen;
-  --accent: #e09145;
+  --ink: #f4f7f4;
+  --muted: #c4d3c9;
+  --paper: #193a2b;
+  --panel: #0b2b1c;
+  --light-square: #e8e4d7;
+  --dark-square: #66856c;
+  --accent: #f4d35e;
   --danger: #c74343;
-  --board-size: min(90vw, 720px);
+  --board-size: min(90vw, 720px, 72vh);
 }
 
 /* Keep sizing predictable so the board remains square at every viewport size. */
@@ -40,7 +38,9 @@ body {
   text-align: center;
 }
 
-.game-header { margin-bottom: 22px; }
+.menu-link { display: inline-block; margin-bottom: 14px; color: var(--ink); font-size: .85rem; }
+.menu-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+.game-header { position: relative; margin-bottom: 22px; }
 .eyebrow { margin: 0 0 8px; color: var(--muted); font-size: .72rem; letter-spacing: .12em; }
 h1 { margin: 0; font-size: clamp(2.1rem, 7vw, 4rem); letter-spacing: .08em; }
 .turn-status { margin: 10px 0 0; color: var(--accent); font-size: clamp(.95rem, 2.2vw, 1.2rem); font-weight: 700; }
@@ -48,6 +48,7 @@ h1 { margin: 0; font-size: clamp(2.1rem, 7vw, 4rem); letter-spacing: .08em; }
 .board-wrap { display: flex; justify-content: center; overflow: visible; }
 /* The assembly rotates as a unit; text and pieces are counter-rotated in black view. */
 .board-assembly {
+  position: relative;
   display: grid;
   grid-template-columns: 24px var(--board-size);
   grid-template-rows: var(--board-size) 24px;
@@ -85,20 +86,44 @@ h1 { margin: 0; font-size: clamp(2.1rem, 7vw, 4rem); letter-spacing: .08em; }
 .rank-labels { grid-column: 1; grid-row: 1; display: grid; grid-template-rows: repeat(8, 1fr); align-items: center; justify-items: center; font-size: clamp(.62rem, 2vw, .85rem); }
 .file-labels { grid-column: 2; grid-row: 2; display: grid; grid-template-columns: repeat(8, 1fr); align-items: center; font-size: clamp(.62rem, 2vw, .85rem); }
 
-.controls { margin-top: 22px; }
-.button { border: 2px solid var(--ink); padding: 10px 18px; color: var(--paper); background: var(--ink); font: inherit; font-size: .78rem; cursor: pointer; }
-.button:hover, .button:focus-visible { color: var(--ink); background: var(--accent); outline: none; }
+.controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; margin-top: 22px; }
+.button { border: 1px solid #587562; border-radius: 5px; padding: 10px 16px; color: var(--ink); background: var(--paper); font: inherit; font-size: .78rem; cursor: pointer; }
+.button:hover { border-color: var(--accent); background: #274d39; }
+.button:focus-visible, .promotion-choice:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
 .message { min-height: 1.4em; margin: 14px 0 0; color: var(--muted); font-size: .78rem; }
 
-.modal { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 20px; background: rgba(22, 37, 31, .58); }
+.modal { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 20px; background: rgba(3, 16, 9, .76); }
 .modal[hidden] { display: none; }
-.modal-content { width: min(100%, 420px); padding: 32px 24px; border: 3px solid var(--ink); background: var(--panel); box-shadow: 0 18px 45px rgba(0, 0, 0, .25); }
+.modal-content { width: min(100%, 440px); padding: 28px 24px; border: 1px solid #587562; border-radius: 8px; color: var(--ink); background: var(--panel); box-shadow: 0 18px 45px rgba(0, 0, 0, .4); }
 .modal-content h2 { margin: 0 0 10px; font-size: clamp(1.5rem, 5vw, 2.3rem); }
 .game-over-result { margin: 0 0 24px; color: var(--accent); font-weight: 700; }
 .promotion-choices { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 22px; }
-.promotion-choice { min-height: 74px; border: 2px solid var(--ink); color: var(--ink); background: var(--paper); font: inherit; cursor: pointer; }
+.promotion-choice { min-height: 74px; border: 1px solid #587562; border-radius: 5px; color: var(--ink); background: var(--paper); font: inherit; cursor: pointer; }
 .promotion-choice:hover, .promotion-choice:focus-visible { background: var(--accent); outline: none; }
 .promotion-piece { display: block; font-size: 2rem; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+
+.board-assembly.xiangqi-view {
+  display: block;
+  width: var(--board-size);
+  aspect-ratio: 9 / 10;
+  height: auto;
+}
+.xiangqi-view .rank-labels, .xiangqi-view .file-labels { display: none; }
+.chess-board.xiangqi-mode { width: 100%; height: 100%; border: 2px solid #705535; background: #ead6aa; }
+.xiangqi-mode td { position: relative; width: 11.111%; height: 10%; padding: 0; border: 1px solid #8a7048; background: #ead6aa; text-align: center; vertical-align: middle; cursor: pointer; }
+.xiangqi-mode tr:nth-child(5) td { border-bottom-color: transparent; }
+.xiangqi-mode tr:nth-child(6) td { border-top-color: transparent; }
+.xiangqi-mode td.palace-down-right { background-image: linear-gradient(to bottom right, transparent 49%, #8a7048 49.5%, #8a7048 50.5%, transparent 51%); }
+.xiangqi-mode td.palace-down-left { background-image: linear-gradient(to bottom left, transparent 49%, #8a7048 49.5%, #8a7048 50.5%, transparent 51%); }
+.xiangqi-mode td.selected { outline: 3px solid #d78a25; outline-offset: -3px; }
+.xiangqi-mode td.legal-move { box-shadow: inset 0 0 0 3px rgba(39, 116, 68, .65); }
+.xiangqi-mode td.capture-move { box-shadow: inset 0 0 0 3px rgba(183, 46, 46, .8); }
+.piece.xiangqi-piece { display: grid; place-items: center; width: 82%; height: 82%; margin: auto; padding: 0; border: 2px solid currentColor; border-radius: 50%; background: #f3e5c2; box-shadow: 0 1px 3px #34271966; font-family: "Noto Serif CJK SC", "Microsoft YaHei", serif; font-size: clamp(1rem, 5vw, 2rem); line-height: 1; }
+.xiangqi-piece.red { color: #b52626; }
+.xiangqi-piece.black { color: #20241f; }
+#riverLabel { position: absolute; z-index: 2; top: 50%; left: 50%; padding: 0 8px; transform: translate(-50%, -50%); color: #785c37; background: #ead6aa; font-size: clamp(.7rem, 3vw, 1.1rem); white-space: nowrap; pointer-events: none; }
+#riverLabel[hidden] { display: none; }
 
 @media (max-width: 500px) {
   .app-shell { padding: 26px 10px 36px; }

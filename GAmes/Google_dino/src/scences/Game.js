@@ -1,5 +1,23 @@
 const WIDTH = 1024;
 const HEIGHT = 768;
+const HIGH_SCORE_KEY = "javanoffice.googleDino.highScore";
+
+function readHighScore() {
+    try {
+        const storedScore = Number(localStorage.getItem(HIGH_SCORE_KEY));
+        return Number.isSafeInteger(storedScore) && storedScore >= 0 ? storedScore : 0;
+    } catch {
+        return 0;
+    }
+}
+
+function saveHighScore(score) {
+    try {
+        localStorage.setItem(HIGH_SCORE_KEY, String(score));
+    } catch {
+        // Storage may be unavailable in restricted browser contexts.
+    }
+}
 
 let player;
 let clouds;
@@ -79,6 +97,11 @@ class Game extends Phaser.Scene {
         this.canJump = true
         this.timer = 0;
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.handleTouchJump = this.handleTouchJump.bind(this);
+        this.input.on("pointerdown", this.handleTouchJump);
+        this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+            this.input.off("pointerdown", this.handleTouchJump);
+        });
         this.physics.add.collider(this.obstacles, this.player, this.gameOver, null, this);
         this.gameOverText = this.add.image(0, 0, "game-over").setDepth(1);
         this.gameOverWhiteText = this.add.image(0, 0, "game-over-white").setDepth(1);
@@ -88,7 +111,7 @@ class Game extends Phaser.Scene {
         this.gameOverWhiteContainer = this.add.container(1024 / 2, (300 / 2) -50).add([this.gameOverWhiteText, this.restartWhiteText]).setAlpha(0); 
         //this.scoreText = this.add.text(900, 60, "000000",{fontSize: "30px", fontFamily: "Arial", color: "#535353", relsolution: 5}).setOrigin(1, 0);
         this.score = 0;
-        this.highScore = 0;
+        this.highScore = readHighScore();
         this.isNight = false;
         this.nextDayNight = 1000;
         this.frameCounter = 0;
@@ -126,6 +149,9 @@ for (let i = 0; i < 7; i++) { const digit = this.add.sprite( 820 + (i * 22), 95,
     this.highScoreDigits.push(digit)
     this.highScoreWhiteDigits.push(whiteDigit)
 }
+
+this.updateScoreDisplay(this.highScoreDigits, this.highScore);
+this.updateScoreDisplay(this.highScoreWhiteDigits, this.highScore);
 
 
 
@@ -234,7 +260,7 @@ this.anims.create({
         b: 255,
         duration: 1500
     });
-        this.sound.play("jumping")
+        this.playSound("jumping")
         this.isDown = false
         
 
@@ -465,7 +491,7 @@ if (currentMilestone > this.lastMilestone) {
     this.scoreDigits.forEach(d => d.setAlpha(1));
     });
      // Play sound
-    this.sound.play("reaching");
+    this.playSound("reaching");
 }
 
 
@@ -657,7 +683,7 @@ if (down.isDown && this.player.body.onFloor()) {
     //jump logic
     if (jumpPressed && this.player.body.onFloor() && !this.isDown) {
     this.player.setVelocityY(-1150);
-    this.sound.play("jumping");
+    this.playSound("jumping");
 }
 
     if (this.player.body.velocity.y > 0 && this.player.body.velocity.y < 800) {
@@ -721,6 +747,7 @@ if (down.isDown && this.player.body.onFloor()) {
     if (this.score > this.highScore) {
 
         this.highScore = this.score;
+        saveHighScore(this.highScore);
 
         // Format like Chrome Dino
         const formattedHighScore =
@@ -743,7 +770,7 @@ if (down.isDown && this.player.body.onFloor()) {
     this.anims.pauseAll();
 
     this.player.setTexture(this.getHurtTextureKey());
-    this.sound.play("hitting");
+    this.playSound("hitting");
 
     
 
@@ -751,6 +778,18 @@ if (down.isDown && this.player.body.onFloor()) {
         
         
     }
+
+    handleTouchJump() {
+        if (this.isGameRunning && !this.isDown && this.player.body.onFloor()) {
+            this.player.setVelocityY(-1150);
+            this.playSound("jumping");
+        }
+    }
+
+    playSound(key) {
+        if (this.cache.audio.exists(key)) this.sound.play(key);
+    }
+
     getRunAnimKey() {
     return this.isNight ? "dino-white-run" : "dino-run";
 }

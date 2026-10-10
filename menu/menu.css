@@ -1,47 +1,194 @@
-#title{
-    margin: auto;
+
+header{
+    text-align: center;
+    text-decoration: underline;
+}
+html, body {
+    background-color: seagreen;
+}
+body {
+    background-color: hsla(0, 0%, 0%, 0.702);
+    font-family: "Source Code Pro", Verdana, Geneva, Tahoma, sans-serif;
+    font-size: larger;
+    overflow: auto;
 }
 
-.navbar {
-    display: flex;
-    gap: 50px;
-    background-color: hsla(0, 0%, 16%, 0.657);
-    padding: 10px
+
+section {
+    box-shadow: 1px 1px 1px hsla(0, 0%, 50%, 0.625);
+    border-radius: 45px;
+    border: thick, black;
 }
 
-.nav-item {
-    position: relative;
-    color: #aaaaaa;
-    text-decoration: none;
-    font-size: 24px;
-    padding: 10px 0;
+
+#FadeinTitle {
+    font-size: 60px;
+    font-weight: bold;
+    text-align: center;
+
+    /* ===== Multi-colour Placeholder ===== */
+    background: linear-gradient(
+        90deg,
+        Blue,
+        cyan,
+        purple
+    );
+
+    background-clip: text;
+    -webkit-background-clip: text;
+
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+
+    /* Fade in when page loads */
+    opacity: 0;
+    animation: fadeIn 1.5s ease forwards;
 }
 
-/* Hover effect */
-.nav-item:hover {
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px); /* Optional: starts slightly lower */
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+h2 {
+    font-size: 40px;
     color: white;
+    text-decoration: underline;
 }
 
-/* The underline */
-.nav-item::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -10px;
 
-    width: 0;
-    height: 3px;
-
-    background-color: white;
-
-    transition: width 0.25s ease;
+.dock-container {
+  /* Enables 3D space rendering */
+  perspective: 1000px; 
+  padding-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Active page */
-.nav-item.active {
-    color: white;
+.dock {
+  display: flex;
+  list-style: none;
+  padding: 10px 40px;
+  margin: 0;
+  gap: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  border: 34px solid rgba(255, 255, 255, 0.1);
+  
+  /* Rotates the dock slightly backward to create the horizon curve */
+  transform: rotateX(25deg);
+  transform-style: preserve-3d;
 }
 
-.nav-item.active::after {
-    width: 100%;
+.dock li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.game-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.game-link:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 6px;
+  border-radius: 8px;
+}
+
+.dock .icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+/* Subtle label below the icon */
+.dock li span {
+  font-family: sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  margin-top: 8px;
+  pointer-events: none;
+}
+
+.dock li:hover .icon {
+  transform: scale(1.2) translateY(-10px);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dock1{
+  display: flex;
+  list-style: none;
+  padding: 10px 40px;
+  margin: 0;
+  gap: 40px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  border: 34px solid rgba(255, 255, 255, 0.1);
+  
+  /* Rotates the dock slightly backward to create the horizon curve */
+  transform: rotateX(25deg);
+  transform-style: preserve-3d;
+}
+
+.dock1 li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.dock1 .icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+/* Subtle label below the icon */
+.dock1 li span {
+  font-family: sans-serif;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  margin-top: 8px;
+  pointer-events: none;
+}
+
+.dock1 li:hover .icon {
+  transform: scale(1.2) translateY(-10px);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+li{
+  color: white;
 }
