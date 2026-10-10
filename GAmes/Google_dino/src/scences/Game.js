@@ -84,8 +84,8 @@ class Game extends Phaser.Scene {
         ]) //add cloud image
         this.gameSpeed = 10; //if you are chaning gamespeed, change all that is relvant to make the game fair
 
-        //add an invisible staticSprite to handle collsions
-        this.groundCollider = this.physics.add.staticSprite(0, 300, "ground").setOrigin(0, 1);
+        //add an invisible staticSprite to handle collsions 
+        this.groundCollider = this.physics.add.staticSprite(0, 300, "ground").setOrigin(0, 1).setVisible(false);
         this.groundCollider.body.setSize(1000, 30); //Adjust Collison size if necessary
 
         //enable collsion between the player and the invisible collider
