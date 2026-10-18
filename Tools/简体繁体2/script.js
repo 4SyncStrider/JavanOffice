@@ -6,7 +6,7 @@
  * use rather than a full linguistic guarantee for every edge-case phrase.
  */
 
-import * as OpenCC from "../../node_modules/opencc-js";
+import * as OpenCC from "../../node_modules/opencc-js/dist/esm/full.js";
 
 const inputText = document.querySelector("#inputText");
 const outputText = document.querySelector("#outputText");

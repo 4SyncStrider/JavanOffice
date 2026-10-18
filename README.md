@@ -12,9 +12,15 @@ JavanOffice is a lightweight browser-based toolkit and game hub built with HTML,
 
 ## Open the project
 
-Open the root file in a browser:
+For regular use, you can open the root file directly:
 
 - index.html
+
+## Progressive Web App
+
+JavanOffice includes a web app manifest and a service worker that caches the site pages and local game assets for offline use. To install the app or enable offline support, serve the project from `localhost` or an HTTPS host; browsers do not enable service workers for `file://` pages.
+
+For example, run a local static server from the project root with `npx serve .`, then open the URL it prints. The browser's install command appears when its PWA install criteria are met.
 
 ## Notes
 
