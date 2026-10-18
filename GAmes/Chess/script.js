@@ -45,21 +45,13 @@ const gameOverModal = document.querySelector("#gameOverModal");
 const gameTitle = document.querySelector("#gameTitle");
 const switchVariantButton = document.querySelector("#switchVariantButton");
 const variantConfirmModal = document.querySelector("#variantConfirmModal");
-const gameSetupModal = document.querySelector("#gameSetupModal");
-const gameSetupTitle = document.querySelector("#gameSetupTitle");
-const gameSetupMessage = document.querySelector("#gameSetupMessage");
-const setupError = document.querySelector("#setupError");
-const whiteSideButton = document.querySelector("#whiteSideButton");
-const blackSideButton = document.querySelector("#blackSideButton");
-const cancelSetupButton = document.querySelector("#cancelSetupButton");
-const startGameButton = document.querySelector("#startGameButton");
 const variantConfirmTitle = document.querySelector("#variantConfirmTitle");
 const variantConfirmMessage = document.querySelector("#variantConfirmMessage");
 const cancelVariantButton = document.querySelector("#cancelVariantButton");
 const confirmVariantButton = document.querySelector("#confirmVariantButton");
 const riverLabel = document.querySelector("#riverLabel");
 const XIANGQI_PIECES = {
-  red: { k: "帥", a: "仕", e: "相", h: "傌", r: "俥", c: "砲", s: "兵" },
+  red: { k: "帥", a: "仕", e: "相", h: "馬", r: "車", c: "砲", s: "兵" },
   black: { k: "將", a: "士", e: "象", h: "馬", r: "車", c: "炮", s: "卒" },
 };
 let activeVariant = "english";
@@ -68,7 +60,6 @@ let xiangqiMatchStatus = "notStarted";
 let xiangqiSelected = null;
 let xiangqiLegalMoves = [];
 let pendingVariant = null;
-let selectedPlayerSide = null;
 
 function createPiece(color, type, moved = false) {
   return { color, type, moved };
@@ -164,8 +155,8 @@ function ensureEnglishBoard() {
 // RENDERING AND INTERACTION
 // ================================
 
-// The table always renders logical rows 8 through 1. CSS rotates the entire
-// assembly for Black, while piece and label text are rotated back upright.
+// The table keeps its logical coordinates; CSS rotates the whole assembly for
+// Black and counter-rotates piece artwork and notation to keep them readable.
 function renderBoard() {
   ensureEnglishBoard();
   boardElement.classList.remove("xiangqi-mode");
@@ -200,7 +191,7 @@ function renderBoard() {
       updateCssChessPiece(pieceElement, piece);
     }
   }
-  boardAssembly.classList.remove("black-view");
+  boardAssembly.classList.toggle("black-view", state.turn === "b");
   boardAssembly.classList.add("white-view");
   const colorName = state.turn === "w" ? "WHITE" : "BLACK";
   turnStatus.textContent = state.gameOver
@@ -211,7 +202,7 @@ function renderBoard() {
 function renderXiangqiBoard() {
   boardBody.innerHTML = "";
   boardElement.classList.add("xiangqi-mode");
-  boardAssembly.classList.remove("black-view");
+  boardAssembly.classList.toggle("black-view", xiangqiState.turn === "black");
   boardAssembly.classList.add("white-view");
   boardAssembly.classList.add("xiangqi-view");
   riverLabel.hidden = false;
@@ -717,47 +708,7 @@ function updateVariantInterface() {
   );
 }
 
-function showGameSetup() {
-  const isEnglish = activeVariant === "english";
-  selectedPlayerSide = null;
-  promotionModal.hidden = true;
-  gameOverModal.hidden = true;
-  gameSetupTitle.textContent = isEnglish ? "Choose your side" : "选择你的棋方";
-  gameSetupMessage.textContent = isEnglish
-    ? "Choose which side to play as. White will remain at the bottom of the board."
-    : "请选择你要执的一方。棋盘始终保持红方在下。";
-  whiteSideButton.textContent = isEnglish ? "White" : "Red · 红方";
-  blackSideButton.textContent = isEnglish ? "Black" : "Black · 黑方";
-  whiteSideButton.setAttribute("aria-pressed", "false");
-  blackSideButton.setAttribute("aria-pressed", "false");
-  setupError.hidden = true;
-  setupError.textContent = "";
-  gameSetupModal.hidden = false;
-  whiteSideButton.focus();
-}
-
-function selectPlayerSide(side) {
-  selectedPlayerSide = side;
-  whiteSideButton.setAttribute(
-    "aria-pressed",
-    String(side === (activeVariant === "english" ? "w" : "red"))
-  );
-  blackSideButton.setAttribute(
-    "aria-pressed",
-    String(side === (activeVariant === "english" ? "b" : "black"))
-  );
-  setupError.hidden = true;
-}
-
 function startNewGame() {
-  if (!selectedPlayerSide) {
-    setupError.textContent = "Choose a side before starting the game.";
-    setupError.hidden = false;
-    whiteSideButton.focus();
-    return;
-  }
-
-  gameSetupModal.hidden = true;
   if (activeVariant === "english") {
     resetGame();
     state.matchStatus = "inProgress";
@@ -784,7 +735,6 @@ function switchVariant(variant) {
   xiangqiLegalMoves = [];
   updateVariantInterface();
   if (activeVariant === "xiangqi") renderXiangqiBoard();
-  showGameSetup();
 }
 
 function closeVariantConfirmation(returnFocus = true) {
@@ -833,8 +783,8 @@ function requestVariantSwitch() {
   document.addEventListener("keydown", handleVariantDialogKeydown);
 }
 
-document.querySelector("#resetButton").addEventListener("click", showGameSetup);
-document.querySelector("#modalResetButton").addEventListener("click", showGameSetup);
+document.querySelector("#resetButton").addEventListener("click", startNewGame);
+document.querySelector("#modalResetButton").addEventListener("click", startNewGame);
 document.querySelector("#gameOverSwitchButton").addEventListener("click", requestVariantSwitch);
 switchVariantButton.addEventListener("click", requestVariantSwitch);
 cancelVariantButton.addEventListener("click", () => closeVariantConfirmation());
@@ -848,16 +798,6 @@ confirmVariantButton.addEventListener("click", () => {
 variantConfirmModal.addEventListener("click", (event) => {
   if (event.target === variantConfirmModal) closeVariantConfirmation();
 });
-whiteSideButton.addEventListener("click", () =>
-  selectPlayerSide(activeVariant === "english" ? "w" : "red")
-);
-blackSideButton.addEventListener("click", () =>
-  selectPlayerSide(activeVariant === "english" ? "b" : "black")
-);
-startGameButton.addEventListener("click", startNewGame);
-cancelSetupButton.addEventListener("click", () => {
-  window.location.href = "../../index.html";
-});
 
 updateVariantInterface();
-showGameSetup();
+resetGame();

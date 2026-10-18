@@ -43,48 +43,6 @@
       </div>
     </main>
 
-    <!-- The setup dialog chooses the starting perspective before a match begins. -->
-    <div id="gameSetupModal" class="modal" hidden>
-      <section
-        class="modal-content"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="gameSetupTitle"
-        aria-describedby="gameSetupMessage"
-      >
-        <p class="eyebrow">NEW MATCH</p>
-        <h2 id="gameSetupTitle">Choose your side</h2>
-        <p id="gameSetupMessage">
-          Choose which side to play as. White will remain at the bottom of the board.
-        </p>
-        <div class="side-choices">
-          <button
-            id="whiteSideButton"
-            class="button side-choice"
-            type="button"
-            aria-pressed="false"
-          >
-            White
-          </button>
-          <button
-            id="blackSideButton"
-            class="button side-choice"
-            type="button"
-            aria-pressed="false"
-          >
-            Black
-          </button>
-        </div>
-        <p id="setupError" class="selection-error" role="alert" hidden></p>
-        <div class="dialog-actions">
-          <button id="startGameButton" class="button" type="button">Start Game</button>
-          <button id="cancelSetupButton" class="button cancel-choice" type="button">
-            Cancel · Main menu
-          </button>
-        </div>
-      </section>
-    </div>
-
     <!-- These dialogs are toggled by JavaScript and block board interaction while open. -->
     <div id="promotionModal" class="modal" hidden>
       <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="promotionTitle">

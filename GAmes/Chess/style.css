@@ -89,6 +89,15 @@ h1 {
   transition: transform 0.5s ease;
   transform-origin: center;
 }
+.board-assembly.black-view {
+  transform: rotate(180deg);
+}
+.black-view .rank-labels span,
+.black-view .file-labels span,
+.black-view .chess-piece,
+.black-view .xiangqi-piece {
+  transform: rotate(180deg);
+}
 
 .chess-board {
   grid-column: 2;
@@ -470,40 +479,6 @@ h1 {
   gap: 8px;
   margin-top: 22px;
 }
-.side-choices {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 24px 0 12px;
-}
-.side-choice {
-  min-height: 54px;
-  border-color: var(--accent);
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-.side-choice[aria-pressed="true"] {
-  color: var(--panel);
-  background: var(--accent);
-}
-.selection-error {
-  margin: 12px 0 0;
-  color: #ff8f86;
-  font-size: 0.82rem;
-}
-.selection-error[hidden] {
-  display: none;
-}
-.cancel-choice {
-  border-color: transparent;
-  background: transparent;
-  color: var(--muted);
-}
-.cancel-choice:hover {
-  border-color: #587562;
-  color: var(--ink);
-}
-
 .board-assembly.xiangqi-view {
   display: block;
   width: var(--board-size);
@@ -586,6 +561,9 @@ h1 {
 .xiangqi-piece.black {
   color: #20241f;
 }
+.black-view #riverLabel {
+  transform: translate(-50%, -50%) rotate(180deg);
+}
 #riverLabel {
   position: absolute;
   z-index: 2;
@@ -601,11 +579,6 @@ h1 {
 }
 #riverLabel[hidden] {
   display: none;
-}
-
-#gameSetupModal {
-  -webkit-backdrop-filter: blur(7px);
-  backdrop-filter: blur(7px);
 }
 
 @media (max-width: 500px) {
