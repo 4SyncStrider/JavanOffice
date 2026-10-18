@@ -1,29 +1,29 @@
- const config = {
+const config = {
   type: Phaser.AUTO,
   width: 1024,
   height: 768,
   backgroundColor: "#FFF",
-  parent: 'game-container',
+  parent: "game-container",
   scale: {
     mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH
+    autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [
-    Game
-  ],
+  scene: [Game],
   physics: {
-    default: 'arcade',
+    default: "arcade",
     arcade: {
       gravity: { y: 300 },
-      debug: false
-    }
+      debug: false,
+    },
   },
 };
 
 const dinoGame = new Phaser.Game(config);
 
-window.addEventListener("pagehide", event => {
-  if (!event.persisted) dinoGame.destroy(true);
-}, { once: true });
-
-
+window.addEventListener(
+  "pagehide",
+  (event) => {
+    if (!event.persisted) dinoGame.destroy(true);
+  },
+  { once: true }
+);

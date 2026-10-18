@@ -1,80 +1,80 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Calculator & Formulas | JavanOffice</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="tool-shell">
-    <header class="tool-header">
-      <a class="back-link" href="../../index.html">← Main menu</a>
-      <div class="header-copy">
-        <p class="eyebrow">JAVANOFFICE TOOLS</p>
-        <h1>Calculator & Formulas</h1>
-      </div>
-    </header>
-
-    <main class="math-layout">
-      <section class="panel calculator-panel">
-        <h2>Calculator</h2>
-        <div id="calcDisplay" class="calc-display" aria-live="polite">0</div>
-        <div class="calc-buttons">
-          <button type="button" data-action="clear">C</button>
-          <button type="button" data-action="delete">⌫</button>
-          <button type="button" data-action="percent">%</button>
-          <button type="button" data-action="operator" data-value="/">÷</button>
-
-          <button type="button" data-action="digit" data-value="7">7</button>
-          <button type="button" data-action="digit" data-value="8">8</button>
-          <button type="button" data-action="digit" data-value="9">9</button>
-          <button type="button" data-action="operator" data-value="*">×</button>
-
-          <button type="button" data-action="digit" data-value="4">4</button>
-          <button type="button" data-action="digit" data-value="5">5</button>
-          <button type="button" data-action="digit" data-value="6">6</button>
-          <button type="button" data-action="operator" data-value="-">−</button>
-
-          <button type="button" data-action="digit" data-value="1">1</button>
-          <button type="button" data-action="digit" data-value="2">2</button>
-          <button type="button" data-action="digit" data-value="3">3</button>
-          <button type="button" data-action="operator" data-value="+">+</button>
-
-          <button type="button" data-action="digit" data-value="0" class="wide">0</button>
-          <button type="button" data-action="digit" data-value=".">.</button>
-          <button type="button" data-action="parentheses" data-value="(">(</button>
-          <button type="button" data-action="parentheses" data-value=")">)</button>
-          <button type="button" data-action="equals" class="wide-span">=</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator & Formulas | JavanOffice</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="tool-shell">
+      <header class="tool-header">
+        <a class="back-link" href="../../index.html">← Main menu</a>
+        <div class="header-copy">
+          <p class="eyebrow">JAVANOFFICE TOOLS</p>
+          <h1>Calculator & Formulas</h1>
         </div>
-      </section>
+      </header>
 
-      <section class="panel formula-panel">
-        <h2>Formula calculator</h2>
-        <label class="field-label" for="shapeSelect">Select a shape</label>
-        <select id="shapeSelect">
-          <option value="square">Square</option>
-          <option value="rectangle">Rectangle</option>
-          <option value="triangle">Triangle</option>
-          <option value="circle">Circle</option>
-          <option value="cube">Cube</option>
-          <option value="cuboid">Cuboid</option>
-          <option value="sphere">Sphere</option>
-          <option value="cylinder">Cylinder</option>
-          <option value="cone">Cone</option>
-        </select>
+      <main class="math-layout">
+        <section class="panel calculator-panel">
+          <h2>Calculator</h2>
+          <div id="calcDisplay" class="calc-display" aria-live="polite">0</div>
+          <div class="calc-buttons">
+            <button type="button" data-action="clear">C</button>
+            <button type="button" data-action="delete">⌫</button>
+            <button type="button" data-action="percent">%</button>
+            <button type="button" data-action="operator" data-value="/">÷</button>
 
-        <div id="formulaInputs" class="formula-inputs"></div>
+            <button type="button" data-action="digit" data-value="7">7</button>
+            <button type="button" data-action="digit" data-value="8">8</button>
+            <button type="button" data-action="digit" data-value="9">9</button>
+            <button type="button" data-action="operator" data-value="*">×</button>
 
-        <div class="formula-result-box">
-          <h3>Result</h3>
-          <p id="formulaFormula" class="formula-text"></p>
-          <p id="formulaAnswer" class="answer-text">Choose a shape to begin.</p>
-        </div>
-      </section>
-    </main>
-  </div>
+            <button type="button" data-action="digit" data-value="4">4</button>
+            <button type="button" data-action="digit" data-value="5">5</button>
+            <button type="button" data-action="digit" data-value="6">6</button>
+            <button type="button" data-action="operator" data-value="-">−</button>
 
-  <script src="script.js"></script>
-</body>
+            <button type="button" data-action="digit" data-value="1">1</button>
+            <button type="button" data-action="digit" data-value="2">2</button>
+            <button type="button" data-action="digit" data-value="3">3</button>
+            <button type="button" data-action="operator" data-value="+">+</button>
+
+            <button type="button" data-action="digit" data-value="0" class="wide">0</button>
+            <button type="button" data-action="digit" data-value=".">.</button>
+            <button type="button" data-action="parentheses" data-value="(">(</button>
+            <button type="button" data-action="parentheses" data-value=")">)</button>
+            <button type="button" data-action="equals" class="wide-span">=</button>
+          </div>
+        </section>
+
+        <section class="panel formula-panel">
+          <h2>Formula calculator</h2>
+          <label class="field-label" for="shapeSelect">Select a shape</label>
+          <select id="shapeSelect">
+            <option value="square">Square</option>
+            <option value="rectangle">Rectangle</option>
+            <option value="triangle">Triangle</option>
+            <option value="circle">Circle</option>
+            <option value="cube">Cube</option>
+            <option value="cuboid">Cuboid</option>
+            <option value="sphere">Sphere</option>
+            <option value="cylinder">Cylinder</option>
+            <option value="cone">Cone</option>
+          </select>
+
+          <div id="formulaInputs" class="formula-inputs"></div>
+
+          <div class="formula-result-box">
+            <h3>Result</h3>
+            <p id="formulaFormula" class="formula-text"></p>
+            <p id="formulaAnswer" class="answer-text">Choose a shape to begin.</p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
 </html>

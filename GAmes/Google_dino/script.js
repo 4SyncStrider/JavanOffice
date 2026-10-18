@@ -867,4 +867,3 @@ updateScoreDisplay(scoreArray, value) {
 
 
 */
-

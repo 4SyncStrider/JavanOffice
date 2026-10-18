@@ -19,4 +19,3 @@ This tool converts between Simplified and Traditional Chinese using OpenCC.
 ## Notes
 
 The conversion is practical for everyday text but may still need human review for very specific phrases, names, or complex terminology.
-

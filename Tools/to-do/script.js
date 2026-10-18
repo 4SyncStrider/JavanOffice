@@ -46,15 +46,19 @@ function loadLists() {
     }
 
     return parsed
-      .filter(item => item && typeof item === "object")
-      .map(item => ({
+      .filter((item) => item && typeof item === "object")
+      .map((item) => ({
         id: typeof item.id === "string" ? item.id : generateId("list"),
         name: typeof item.name === "string" && item.name.trim() ? item.name.trim() : "My list",
-        tasks: Array.isArray(item.tasks) ? item.tasks.map(task => ({
-          id: typeof task.id === "string" ? task.id : generateId("task"),
-          text: typeof task.text === "string" ? task.text : "",
-          done: Boolean(task.done),
-        })).filter(task => task.text.trim()) : [],
+        tasks: Array.isArray(item.tasks)
+          ? item.tasks
+              .map((task) => ({
+                id: typeof task.id === "string" ? task.id : generateId("task"),
+                text: typeof task.text === "string" ? task.text : "",
+                done: Boolean(task.done),
+              }))
+              .filter((task) => task.text.trim())
+          : [],
       }));
   } catch {
     return [createList("My list")];
@@ -71,13 +75,13 @@ function selectList(listId) {
 }
 
 function getSelectedList() {
-  return state.lists.find(list => list.id === state.selectedId) || state.lists[0];
+  return state.lists.find((list) => list.id === state.selectedId) || state.lists[0];
 }
 
 function renderListTabs() {
   listTabsElement.innerHTML = "";
 
-  state.lists.forEach(list => {
+  state.lists.forEach((list) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = `list-tab${list.id === state.selectedId ? " active" : ""}`;
@@ -100,7 +104,7 @@ function renderTasks() {
 
   emptyState.hidden = true;
 
-  list.tasks.forEach(task => {
+  list.tasks.forEach((task) => {
     const item = document.createElement("li");
     item.className = `task-item${task.done ? " completed" : ""}`;
 
@@ -141,7 +145,7 @@ function renderTasks() {
     deleteButton.type = "button";
     deleteButton.textContent = "Delete";
     deleteButton.addEventListener("click", () => {
-      list.tasks = list.tasks.filter(entry => entry.id !== task.id);
+      list.tasks = list.tasks.filter((entry) => entry.id !== task.id);
       saveLists();
       renderTasks();
     });
@@ -157,7 +161,7 @@ function render() {
     state.lists = [createList("My list")];
   }
 
-  if (!state.selectedId || !state.lists.some(list => list.id === state.selectedId)) {
+  if (!state.selectedId || !state.lists.some((list) => list.id === state.selectedId)) {
     state.selectedId = state.lists[0].id;
   }
 
@@ -198,7 +202,9 @@ renameListButton.addEventListener("click", () => {
 
 deleteListButton.addEventListener("click", () => {
   if (state.lists.length === 1) {
-    const confirmed = window.confirm("This is your only list. Delete it and create a fresh empty list?");
+    const confirmed = window.confirm(
+      "This is your only list. Delete it and create a fresh empty list?"
+    );
     if (!confirmed) return;
     state.lists = [createList("My list")];
     state.selectedId = state.lists[0].id;
@@ -211,13 +217,13 @@ deleteListButton.addEventListener("click", () => {
   const confirmed = window.confirm(`Delete “${list.name}”? This cannot be undone.`);
   if (!confirmed) return;
 
-  state.lists = state.lists.filter(entry => entry.id !== list.id);
+  state.lists = state.lists.filter((entry) => entry.id !== list.id);
   state.selectedId = state.lists[0].id;
   saveLists();
   render();
 });
 
-taskForm.addEventListener("submit", event => {
+taskForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const value = taskInput.value.trim();
   if (!value) {

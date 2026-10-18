@@ -5,17 +5,20 @@
  * friendly conversion while clearly stating the output is suitable for everyday
  * use rather than a full linguistic guarantee for every edge-case phrase.
  */
-import * as OpenCC from "../../node_modules/opencc-js/dist/esm/full.js";
+
+import * as OpenCC from "../../node_modules/opencc-js";
 
 const inputText = document.querySelector("#inputText");
 const outputText = document.querySelector("#outputText");
 const statusMessage = document.querySelector("#statusMessage");
 const convertButtons = document.querySelectorAll(".convert-btn");
 const clearButton = document.querySelector("#clearButton");
-const copyButton = document.querySelector("#copyButton");
+const copyButton = document.getElementById("copyButton");
+
+console.log(copyButton);
 
 function makeConverter(from, to) {
-  return OpenCC.Converter({ from, to });
+  return OpenCC.Converter({ from: from, to: to });
 }
 
 function convertText(direction) {
@@ -28,14 +31,13 @@ function convertText(direction) {
   }
 
   try {
-    const converter = direction === "s2t"
-      ? makeConverter("cn", "tw")
-      : makeConverter("tw", "cn");
+    const converter = direction === "s2t" ? makeConverter("cn", "tw") : makeConverter("tw", "cn");
 
     outputText.value = converter(text);
-    statusMessage.textContent = direction === "s2t"
-      ? "Converted Simplified Chinese to Traditional Chinese."
-      : "Converted Traditional Chinese to Simplified Chinese.";
+    statusMessage.textContent =
+      direction === "s2t"
+        ? "Converted Simplified Chinese to Traditional Chinese."
+        : "Converted Traditional Chinese to Simplified Chinese.";
   } catch (error) {
     outputText.value = "";
     statusMessage.textContent = "Conversion failed. Please try a different text sample.";
@@ -43,7 +45,7 @@ function convertText(direction) {
   }
 }
 
-convertButtons.forEach(button => {
+convertButtons.forEach((button) => {
   button.addEventListener("click", () => convertText(button.dataset.direction));
 });
 
@@ -57,18 +59,11 @@ clearButton.addEventListener("click", () => {
 copyButton.addEventListener("click", async () => {
   const content = outputText.value.trim();
 
-  if (!content) {
-    statusMessage.textContent = "There is nothing to copy yet.";
-    return;
-  }
-
   try {
     await navigator.clipboard.writeText(content);
     statusMessage.textContent = "Converted text copied to clipboard.";
   } catch {
-    statusMessage.textContent = "Clipboard access was unavailable. Please copy the output manually.";
+    statusMessage.textContent =
+      "Clipboard access was unavailable. Please copy the output manually.";
   }
 });
-
-
-

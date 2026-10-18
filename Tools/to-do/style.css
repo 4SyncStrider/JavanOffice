@@ -12,9 +12,12 @@
   --border: rgba(255, 255, 255, 0.12);
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
-html, body {
+html,
+body {
   margin: 0;
   min-height: 100%;
   background: var(--page-bg);
@@ -28,7 +31,8 @@ body {
   padding: 28px 18px 40px;
 }
 
-button, input {
+button,
+input {
   font: inherit;
 }
 
@@ -106,7 +110,9 @@ button, input {
   padding: 12px 14px;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .list-tab.active {
@@ -148,7 +154,9 @@ button, input {
   color: #07231a;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .task-form button,
@@ -202,7 +210,7 @@ button, input {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.8);
+  border: 2px solid rgba(255, 255, 255, 0.8);
   background: transparent;
   cursor: pointer;
 }
@@ -223,7 +231,7 @@ button, input {
 
 .task-actions button {
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text);
   padding: 6px 8px;
 }

@@ -8,4 +8,15 @@ node_modules/
 
 npmPackages/
 
-Information/
+Chess_test_server/
+
+info/
+
+X/
+
+package-lock.json
+package.json
+
+test.js
+
+instruction.md

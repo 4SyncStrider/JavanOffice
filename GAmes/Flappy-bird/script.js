@@ -61,9 +61,13 @@
       const pipeWidth = 64;
       const upperHeight = center - gap / 2;
       const lowerY = center + gap / 2;
-      const upper = this.add.rectangle(x, upperHeight / 2, pipeWidth, upperHeight, 0x2c8b57).setOrigin(0.5);
+      const upper = this.add
+        .rectangle(x, upperHeight / 2, pipeWidth, upperHeight, 0x2c8b57)
+        .setOrigin(0.5);
       const lowerHeight = GROUND_Y - lowerY;
-      const lower = this.add.rectangle(x, lowerY + lowerHeight / 2, pipeWidth, lowerHeight, 0x2c8b57).setOrigin(0.5);
+      const lower = this.add
+        .rectangle(x, lowerY + lowerHeight / 2, pipeWidth, lowerHeight, 0x2c8b57)
+        .setOrigin(0.5);
       this.add.rectangle(x, upperHeight - 7, pipeWidth + 12, 14, 0x237348);
       this.add.rectangle(x, lowerY + 7, pipeWidth + 12, 14, 0x237348);
       this.pipes.push({ x, upper, lower, passed: false, center, gap, pipeWidth });
@@ -104,13 +108,17 @@
         const birdBottom = birdBody.bottom;
         const pipeLeft = pipe.x - pipe.pipeWidth / 2;
         const pipeRight = pipe.x + pipe.pipeWidth / 2;
-        if (birdRight > pipeLeft && birdLeft < pipeRight && (birdTop < pipe.center - pipe.gap / 2 || birdBottom > pipe.center + pipe.gap / 2)) {
+        if (
+          birdRight > pipeLeft &&
+          birdLeft < pipeRight &&
+          (birdTop < pipe.center - pipe.gap / 2 || birdBottom > pipe.center + pipe.gap / 2)
+        ) {
           this.endGame();
           return;
         }
       }
 
-      this.pipes = this.pipes.filter(pipe => {
+      this.pipes = this.pipes.filter((pipe) => {
         if (pipe.x < -pipe.pipeWidth) {
           pipe.upper.destroy();
           pipe.lower.destroy();
@@ -137,7 +145,7 @@
     backgroundColor: "#d7f1f5",
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     physics: { default: "arcade", arcade: { gravity: { y: 1450 }, debug: false } },
-    scene: [FlappyScene]
+    scene: [FlappyScene],
   };
 
   game = new Phaser.Game(config);
@@ -165,11 +173,15 @@
   pauseButton.addEventListener("click", pauseGame);
   restartButton.addEventListener("click", restartGame);
 
-  window.addEventListener("pagehide", () => {
-    pauseButton.removeEventListener("click", pauseGame);
-    restartButton.removeEventListener("click", restartGame);
-    game?.destroy(true);
-    game = null;
-    scene = null;
-  }, { once: true });
+  window.addEventListener(
+    "pagehide",
+    () => {
+      pauseButton.removeEventListener("click", pauseGame);
+      restartButton.removeEventListener("click", restartGame);
+      game?.destroy(true);
+      game = null;
+      scene = null;
+    },
+    { once: true }
+  );
 })();

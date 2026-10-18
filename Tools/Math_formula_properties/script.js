@@ -17,9 +17,7 @@ let calculatorValue = "";
 const shapeDefinitions = {
   square: {
     label: "Square",
-    inputs: [
-      { name: "side", label: "Side length", placeholder: "e.g. 4" },
-    ],
+    inputs: [{ name: "side", label: "Side length", placeholder: "e.g. 4" }],
     calculate: ({ side }) => {
       const s = Number(side);
       return {
@@ -64,9 +62,7 @@ const shapeDefinitions = {
   },
   circle: {
     label: "Circle",
-    inputs: [
-      { name: "radius", label: "Radius", placeholder: "e.g. 5" },
-    ],
+    inputs: [{ name: "radius", label: "Radius", placeholder: "e.g. 5" }],
     calculate: ({ radius }) => {
       const r = Number(radius);
       return {
@@ -77,9 +73,7 @@ const shapeDefinitions = {
   },
   cube: {
     label: "Cube",
-    inputs: [
-      { name: "side", label: "Side length", placeholder: "e.g. 3" },
-    ],
+    inputs: [{ name: "side", label: "Side length", placeholder: "e.g. 3" }],
     calculate: ({ side }) => {
       const s = Number(side);
       return {
@@ -107,9 +101,7 @@ const shapeDefinitions = {
   },
   sphere: {
     label: "Sphere",
-    inputs: [
-      { name: "radius", label: "Radius", placeholder: "e.g. 5" },
-    ],
+    inputs: [{ name: "radius", label: "Radius", placeholder: "e.g. 5" }],
     calculate: ({ radius }) => {
       const r = Number(radius);
       return {
@@ -165,7 +157,7 @@ function flushDisplay() {
   display.textContent = calculatorValue || "0";
 }
 
-calcButtons.forEach(button => {
+calcButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const action = button.dataset.action;
     const value = button.dataset.value || "";
@@ -382,7 +374,7 @@ function renderFormulaInputs() {
 
   formulaInputs.innerHTML = "";
 
-  definition.inputs.forEach(field => {
+  definition.inputs.forEach((field) => {
     const label = document.createElement("label");
     label.textContent = field.label;
 
@@ -392,8 +384,10 @@ function renderFormulaInputs() {
     input.name = field.name;
     input.placeholder = field.placeholder;
     input.addEventListener("input", () => {
-      const numbers = [...formulaInputs.querySelectorAll("input")].map(element => Number(element.value));
-      if (numbers.some(value => value !== 0 && !Number.isFinite(value))) {
+      const numbers = [...formulaInputs.querySelectorAll("input")].map((element) =>
+        Number(element.value)
+      );
+      if (numbers.some((value) => value !== 0 && !Number.isFinite(value))) {
         return;
       }
       updateFormulaResult();
@@ -418,11 +412,11 @@ function updateFormulaResult() {
   const definition = shapeDefinitions[key];
   const values = {};
 
-  [...formulaInputs.querySelectorAll("input")].forEach(input => {
+  [...formulaInputs.querySelectorAll("input")].forEach((input) => {
     values[input.name] = input.value;
   });
 
-  const allEmpty = Object.values(values).every(value => value === "" || value === null);
+  const allEmpty = Object.values(values).every((value) => value === "" || value === null);
   if (allEmpty) {
     formulaFormula.textContent = definition.label;
     formulaAnswer.textContent = "Choose a shape to begin.";

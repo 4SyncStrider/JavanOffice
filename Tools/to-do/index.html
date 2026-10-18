@@ -1,51 +1,61 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To-do List | JavanOffice</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="tool-shell">
-    <header class="tool-header">
-      <a class="back-link" href="../../index.html">← Main menu</a>
-      <div class="header-copy">
-        <p class="eyebrow">JAVANOFFICE TOOLS</p>
-        <h1>To-do list</h1>
-      </div>
-    </header>
-
-    <main class="todo-layout">
-      <aside class="panel sidebar-panel">
-        <div class="panel-header">
-          <h2>Lists</h2>
-          <button id="newListButton" type="button" class="small-button">+ New list</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>To-do List | JavanOffice</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="tool-shell">
+      <header class="tool-header">
+        <a class="back-link" href="../../index.html">← Main menu</a>
+        <div class="header-copy">
+          <p class="eyebrow">JAVANOFFICE TOOLS</p>
+          <h1>To-do list</h1>
         </div>
-        <ul id="listTabs" class="list-tabs" aria-label="Task lists"></ul>
-      </aside>
+      </header>
 
-      <section class="panel tasks-panel">
-        <div class="panel-header stacked-header">
-          <h2 id="currentListTitle">My list</h2>
-          <div class="list-actions">
-            <button id="renameListButton" type="button" class="small-button secondary">Rename</button>
-            <button id="deleteListButton" type="button" class="small-button danger">Delete</button>
+      <main class="todo-layout">
+        <aside class="panel sidebar-panel">
+          <div class="panel-header">
+            <h2>Lists</h2>
+            <button id="newListButton" type="button" class="small-button">+ New list</button>
           </div>
-        </div>
+          <ul id="listTabs" class="list-tabs" aria-label="Task lists"></ul>
+        </aside>
 
-        <form id="taskForm" class="task-form">
-          <label class="sr-only" for="taskInput">Add a task</label>
-          <input id="taskInput" type="text" maxlength="200" placeholder="Add a task..." autocomplete="off">
-          <button type="submit">Add task</button>
-        </form>
+        <section class="panel tasks-panel">
+          <div class="panel-header stacked-header">
+            <h2 id="currentListTitle">My list</h2>
+            <div class="list-actions">
+              <button id="renameListButton" type="button" class="small-button secondary">
+                Rename
+              </button>
+              <button id="deleteListButton" type="button" class="small-button danger">
+                Delete
+              </button>
+            </div>
+          </div>
 
-        <ul id="taskList" class="task-list" aria-live="polite"></ul>
-        <div id="emptyState" class="empty-state" hidden>No tasks yet. Add the first task.</div>
-      </section>
-    </main>
-  </div>
+          <form id="taskForm" class="task-form">
+            <label class="sr-only" for="taskInput">Add a task</label>
+            <input
+              id="taskInput"
+              type="text"
+              maxlength="200"
+              placeholder="Add a task..."
+              autocomplete="off"
+            />
+            <button type="submit">Add task</button>
+          </form>
 
-  <script src="script.js"></script>
-</body>
+          <ul id="taskList" class="task-list" aria-live="polite"></ul>
+          <div id="emptyState" class="empty-state" hidden>No tasks yet. Add the first task.</div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
 </html>

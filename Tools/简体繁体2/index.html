@@ -1,41 +1,45 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chinese Converter | JavanOffice</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div class="tool-shell">
-    <header class="tool-header">
-      <a class="back-link" href="../../index.html">← Main menu</a>
-      <div class="header-copy">
-        <p class="eyebrow">JAVANOFFICE TOOLS</p>
-        <h1>简体 / 繁體 转换</h1>
-      </div>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chinese Converter | JavanOffice</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="tool-shell">
+      <header class="tool-header">
+        <a class="back-link" href="../../index.html">← Main menu</a>
+        <div class="header-copy">
+          <p class="eyebrow">JAVANOFFICE TOOLS</p>
+          <h1>简体 / 繁體 转换</h1>
+        </div>
+      </header>
 
-    <main class="converter-card">
-      <div class="toolbar">
-        <button type="button" class="convert-btn" data-direction="s2t">简体 → 繁體</button>
-        <button type="button" class="convert-btn" data-direction="t2s">繁體 → 简体</button>
-        <button type="button" class="secondary-btn" id="clearButton">Clear</button>
-        <button type="button" class="secondary-btn" id="copyButton">Copy output</button>
-      </div>
+      <main class="converter-card">
+        <div class="toolbar">
+          <button type="button" class="convert-btn" data-direction="s2t">简体 → 繁體</button>
+          <button type="button" class="convert-btn" data-direction="t2s">繁體 → 简体</button>
+          <button type="button" class="secondary-btn" id="clearButton">Clear</button>
+          <button type="button" class="secondary-btn" id="copyButton">Copy output</button>
+        </div>
 
-      <div class="editor-grid">
-        <label class="field-label" for="inputText">Input</label>
-        <textarea id="inputText" placeholder="Type or paste Chinese text here..."></textarea>
+        <div class="editor-grid">
+          <label class="field-label" for="inputText">Input</label>
+          <textarea id="inputText" placeholder="Type or paste Chinese text here..."></textarea>
 
-        <label class="field-label" for="outputText">Output</label>
-        <textarea id="outputText" readonly placeholder="Converted text will appear here..."></textarea>
-      </div>
+          <label class="field-label" for="outputText">Output</label>
+          <textarea
+            id="outputText"
+            readonly
+            placeholder="Converted text will appear here..."
+          ></textarea>
+        </div>
 
-      <p id="statusMessage" class="status" aria-live="polite">Ready to convert text.</p>
-    </main>
-  </div>
+        <p id="statusMessage" class="status" aria-live="polite">Ready to convert text.</p>
+      </main>
+    </div>
 
-  <script type="module" src="script.js"></script>
-</body>
+    <script type="module" src="../../test.js"></script>
+  </body>
 </html>

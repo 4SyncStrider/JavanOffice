@@ -1,33 +1,35 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b2b1c">
-  <title>Flappy Bird | JavanOffice</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main class="game-page">
-    <header class="page-header">
-      <a class="back-link" href="../../index.html">← Main menu</a>
-      <p class="eyebrow">JAVANOFFICE GAMES</p>
-      <h1>Flappy Bird</h1>
-    </header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0b2b1c" />
+    <title>Flappy Bird | JavanOffice</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="game-page">
+      <header class="page-header">
+        <a class="back-link" href="../../index.html">← Main menu</a>
+        <p class="eyebrow">JAVANOFFICE GAMES</p>
+        <h1>Flappy Bird</h1>
+      </header>
 
-    <section class="game-panel" aria-label="Flappy Bird game">
-      <div class="game-toolbar">
-        <p id="game-status" class="game-status" aria-live="polite">Click, tap, or press Space to start.</p>
-        <div class="game-actions">
-          <button id="pause-button" type="button" disabled>Pause</button>
-          <button id="restart-button" type="button">Restart</button>
+      <section class="game-panel" aria-label="Flappy Bird game">
+        <div class="game-toolbar">
+          <p id="game-status" class="game-status" aria-live="polite">
+            Click, tap, or press Space to start.
+          </p>
+          <div class="game-actions">
+            <button id="pause-button" type="button" disabled>Pause</button>
+            <button id="restart-button" type="button">Restart</button>
+          </div>
         </div>
-      </div>
-      <div id="game-container" class="game-container" aria-label="Game area"></div>
-      <p class="score-line">Score <output id="score">0</output></p>
-    </section>
-  </main>
-  <script src="../Google_dino/phaser.min.js"></script>
-  <script src="script.js"></script>
-</body>
+        <div id="game-container" class="game-container" aria-label="Game area"></div>
+        <p class="score-line">Score <output id="score">0</output></p>
+      </section>
+    </main>
+    <script src="../Google_dino/phaser.min.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>

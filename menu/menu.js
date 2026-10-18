@@ -7,9 +7,10 @@
  */
 const gameLinks = document.querySelectorAll(".game-link");
 
-gameLinks.forEach(link => {
-  link.addEventListener("click", event => {
-    const isPlainPrimaryClick = event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+gameLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    const isPlainPrimaryClick =
+      event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
     if (isPlainPrimaryClick) {
       event.preventDefault();
