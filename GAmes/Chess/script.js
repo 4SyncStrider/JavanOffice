@@ -2,22 +2,19 @@
  * Offline chess game implemented with browser-native JavaScript only.
  *
  * Board coordinates use row 0 for rank 8 and row 7 for rank 1. Files use
- * column 0 for a and column 7 for h. The internal coordinates never change
- * when the board is shown from Black's perspective.
+ * column 0 for a and column 7 for h. Rendering keeps this White-side view fixed.
  */
-
-// ================================
-// USER CONFIGURATION
-// ================================
-const PIECE_STYLE = "emoji";
-// Options: "emoji" or "letter"
 
 // ================================
 // PIECES AND GAME STATE
 // ================================
-const PIECES = {
-  emoji: { w: { k: "♔", q: "♕", r: "♖", b: "♗", n: "♘", p: "♙" }, b: { k: "♚", q: "♛", r: "♜", b: "♝", n: "♞", p: "♟" } },
-  letter: { w: { k: "K", q: "Q", r: "R", b: "B", n: "N", p: "P" }, b: { k: "k", q: "q", r: "r", b: "b", n: "n", p: "p" } }
+const CHESS_PIECE_NAMES = {
+  k: "King",
+  q: "Queen",
+  r: "Rook",
+  b: "Bishop",
+  n: "Knight",
+  p: "Pawn",
 };
 const FILES = "abcdefgh";
 const PROMOTION_TYPES = ["q", "r", "b", "n"];
@@ -32,8 +29,10 @@ const state = {
   enPassant: null,
   gameOver: false,
   matchStatus: "notStarted",
-  pendingPromotion: null
+  pendingPromotion: null,
 };
+const englishRows = [];
+const englishCells = Array.from({ length: 8 }, () => []);
 
 const boardElement = document.querySelector("#chessBoard");
 const boardBody = boardElement.querySelector("tbody");
@@ -46,6 +45,14 @@ const gameOverModal = document.querySelector("#gameOverModal");
 const gameTitle = document.querySelector("#gameTitle");
 const switchVariantButton = document.querySelector("#switchVariantButton");
 const variantConfirmModal = document.querySelector("#variantConfirmModal");
+const gameSetupModal = document.querySelector("#gameSetupModal");
+const gameSetupTitle = document.querySelector("#gameSetupTitle");
+const gameSetupMessage = document.querySelector("#gameSetupMessage");
+const setupError = document.querySelector("#setupError");
+const whiteSideButton = document.querySelector("#whiteSideButton");
+const blackSideButton = document.querySelector("#blackSideButton");
+const cancelSetupButton = document.querySelector("#cancelSetupButton");
+const startGameButton = document.querySelector("#startGameButton");
 const variantConfirmTitle = document.querySelector("#variantConfirmTitle");
 const variantConfirmMessage = document.querySelector("#variantConfirmMessage");
 const cancelVariantButton = document.querySelector("#cancelVariantButton");
@@ -53,7 +60,7 @@ const confirmVariantButton = document.querySelector("#confirmVariantButton");
 const riverLabel = document.querySelector("#riverLabel");
 const XIANGQI_PIECES = {
   red: { k: "帥", a: "仕", e: "相", h: "傌", r: "俥", c: "砲", s: "兵" },
-  black: { k: "將", a: "士", e: "象", h: "馬", r: "車", c: "炮", s: "卒" }
+  black: { k: "將", a: "士", e: "象", h: "馬", r: "車", c: "炮", s: "卒" },
 };
 let activeVariant = "english";
 let xiangqiState = XiangqiEngine.createInitialState();
@@ -61,6 +68,7 @@ let xiangqiMatchStatus = "notStarted";
 let xiangqiSelected = null;
 let xiangqiLegalMoves = [];
 let pendingVariant = null;
+let selectedPlayerSide = null;
 
 function createPiece(color, type, moved = false) {
   return { color, type, moved };
@@ -71,7 +79,7 @@ function emptyBoard() {
 }
 
 function cloneBoard(board) {
-  return board.map(row => row.map(piece => piece ? { ...piece } : null));
+  return board.map((row) => row.map((piece) => (piece ? { ...piece } : null)));
 }
 
 // Legal-move checks run on cloned states so an invalid trial move cannot
@@ -80,7 +88,7 @@ function cloneState(source) {
   return {
     board: cloneBoard(source.board),
     turn: source.turn,
-    enPassant: source.enPassant ? { ...source.enPassant } : null
+    enPassant: source.enPassant ? { ...source.enPassant } : null,
   };
 }
 
@@ -110,6 +118,48 @@ function createStartingBoard() {
   return board;
 }
 
+function createCssChessPiece() {
+  const pieceElement = document.createElement("span");
+  pieceElement.className = "piece chess-piece";
+  pieceElement.hidden = true;
+  pieceElement.setAttribute("aria-hidden", "true");
+  for (const part of ["crown", "body", "base", "mark"]) {
+    const detail = document.createElement("span");
+    detail.className = `piece-${part}`;
+    pieceElement.appendChild(detail);
+  }
+  return pieceElement;
+}
+
+function updateCssChessPiece(element, piece) {
+  element.hidden = !piece;
+  element.className = piece
+    ? `piece chess-piece ${piece.color === "w" ? "white" : "black"} ${CHESS_PIECE_NAMES[piece.type].toLowerCase()}`
+    : "piece chess-piece";
+}
+
+function ensureEnglishBoard() {
+  if (englishRows.length === 0) {
+    for (let row = 0; row < 8; row += 1) {
+      const tableRow = document.createElement("tr");
+      for (let col = 0; col < 8; col += 1) {
+        const cell = document.createElement("td");
+        const pieceElement = createCssChessPiece();
+        cell.dataset.row = row;
+        cell.dataset.col = col;
+        cell.appendChild(pieceElement);
+        cell.addEventListener("click", () => handleSquareClick(row, col));
+        englishCells[row].push({ cell, pieceElement });
+        tableRow.appendChild(cell);
+      }
+      englishRows.push(tableRow);
+    }
+  }
+  if (boardBody.firstElementChild !== englishRows[0]) {
+    boardBody.replaceChildren(...englishRows);
+  }
+}
+
 // ================================
 // RENDERING AND INTERACTION
 // ================================
@@ -117,46 +167,52 @@ function createStartingBoard() {
 // The table always renders logical rows 8 through 1. CSS rotates the entire
 // assembly for Black, while piece and label text are rotated back upright.
 function renderBoard() {
-  boardBody.innerHTML = "";
+  ensureEnglishBoard();
   boardElement.classList.remove("xiangqi-mode");
   boardAssembly.classList.remove("xiangqi-view");
   riverLabel.hidden = true;
   const checkedKing = findKing(state.board, state.turn);
+  const checked = Boolean(checkedKing && isInCheck(state.board, state.turn));
   for (let row = 0; row < 8; row += 1) {
-    const tableRow = document.createElement("tr");
     for (let col = 0; col < 8; col += 1) {
-      const cell = document.createElement("td");
+      const { cell, pieceElement } = englishCells[row][col];
       const piece = state.board[row][col];
       const name = squareName(row, col);
-      cell.dataset.row = row;
-      cell.dataset.col = col;
-      cell.setAttribute("aria-label", piece ? `${piece.color === "w" ? "White" : "Black"} ${piece.type} on ${name}` : `Chess square ${name}`);
-      if (state.selected && state.selected.row === row && state.selected.col === col) cell.classList.add("selected");
-      const move = state.legalMoves.find(candidate => candidate.row === row && candidate.col === col);
-      if (move) cell.classList.add(move.capture ? "capture-move" : "legal-move");
-      if (checkedKing && checkedKing.row === row && checkedKing.col === col && isInCheck(state.board, state.turn)) cell.classList.add("in-check");
-      if (piece) {
-        const pieceElement = document.createElement("span");
-        pieceElement.className = "piece";
-        pieceElement.textContent = PIECES[PIECE_STYLE][piece.color][piece.type];
-        pieceElement.setAttribute("aria-hidden", "true");
-        cell.appendChild(pieceElement);
-      }
-      cell.addEventListener("click", () => handleSquareClick(row, col));
-      tableRow.appendChild(cell);
+      cell.setAttribute(
+        "aria-label",
+        piece
+          ? `${piece.color === "w" ? "White" : "Black"} ${CHESS_PIECE_NAMES[piece.type]} on ${name}`
+          : `Chess square ${name}`
+      );
+      cell.classList.toggle(
+        "selected",
+        Boolean(state.selected && state.selected.row === row && state.selected.col === col)
+      );
+      const move = state.legalMoves.find(
+        (candidate) => candidate.row === row && candidate.col === col
+      );
+      cell.classList.toggle("legal-move", Boolean(move && !move.capture));
+      cell.classList.toggle("capture-move", Boolean(move?.capture));
+      cell.classList.toggle(
+        "in-check",
+        Boolean(checked && checkedKing.row === row && checkedKing.col === col)
+      );
+      updateCssChessPiece(pieceElement, piece);
     }
-    boardBody.appendChild(tableRow);
   }
-  boardAssembly.classList.toggle("black-view", state.turn === "b");
-  boardAssembly.classList.toggle("white-view", state.turn === "w");
+  boardAssembly.classList.remove("black-view");
+  boardAssembly.classList.add("white-view");
   const colorName = state.turn === "w" ? "WHITE" : "BLACK";
-  turnStatus.textContent = state.gameOver ? "GAME OVER" : `${colorName} TO ${state.matchStatus === "notStarted" ? "START" : "MOVE"}`;
+  turnStatus.textContent = state.gameOver
+    ? "GAME OVER"
+    : `${colorName} TO ${state.matchStatus === "notStarted" ? "START" : "MOVE"}`;
 }
 
 function renderXiangqiBoard() {
   boardBody.innerHTML = "";
   boardElement.classList.add("xiangqi-mode");
-  boardAssembly.classList.remove("black-view", "white-view");
+  boardAssembly.classList.remove("black-view");
+  boardAssembly.classList.add("white-view");
   boardAssembly.classList.add("xiangqi-view");
   riverLabel.hidden = false;
   const checked = XiangqiEngine.isInCheck(xiangqiState, xiangqiState.turn);
@@ -165,19 +221,29 @@ function renderXiangqiBoard() {
     for (let col = 0; col < 9; col += 1) {
       const cell = document.createElement("td");
       const piece = xiangqiState.board[row][col];
-      const destination = xiangqiLegalMoves.find(move => move.row === row && move.col === col);
+      const destination = xiangqiLegalMoves.find((move) => move.row === row && move.col === col);
       cell.dataset.row = row;
       cell.dataset.col = col;
-      cell.setAttribute("aria-label", piece ? `${piece.color} ${XIANGQI_PIECES[piece.color][piece.type]}, row ${10 - row}, file ${col + 1}` : `Xiangqi square, row ${10 - row}, file ${col + 1}`);
-      if (xiangqiSelected?.row === row && xiangqiSelected?.col === col) cell.classList.add("selected");
-      if (destination) cell.classList.add(xiangqiState.board[row][col] ? "capture-move" : "legal-move");
-      if (checked && piece?.color === xiangqiState.turn && piece.type === "k") cell.classList.add("in-check");
+      cell.setAttribute(
+        "aria-label",
+        piece
+          ? `${piece.color} ${XIANGQI_PIECES[piece.color][piece.type]}, row ${10 - row}, file ${col + 1}`
+          : `Xiangqi square, row ${10 - row}, file ${col + 1}`
+      );
+      if (xiangqiSelected?.row === row && xiangqiSelected?.col === col)
+        cell.classList.add("selected");
+      if (destination)
+        cell.classList.add(xiangqiState.board[row][col] ? "capture-move" : "legal-move");
+      if (checked && piece?.color === xiangqiState.turn && piece.type === "k")
+        cell.classList.add("in-check");
 
       const palaceRow = row < 3 ? row : row > 6 ? row - 7 : -1;
       if (palaceRow >= 0) {
         const palaceCol = col - 3;
-        if ((palaceRow === 0 && palaceCol === 0) || (palaceRow === 1 && palaceCol === 1)) cell.classList.add("palace-down-right");
-        if ((palaceRow === 0 && palaceCol === 1) || (palaceRow === 1 && palaceCol === 0)) cell.classList.add("palace-down-left");
+        if ((palaceRow === 0 && palaceCol === 0) || (palaceRow === 1 && palaceCol === 1))
+          cell.classList.add("palace-down-right");
+        if ((palaceRow === 0 && palaceCol === 1) || (palaceRow === 1 && palaceCol === 0))
+          cell.classList.add("palace-down-left");
       }
 
       if (piece) {
@@ -200,7 +266,7 @@ function renderXiangqiBoard() {
 function handleXiangqiSquareClick(row, col) {
   if (xiangqiMatchStatus === "completed") return;
   const piece = xiangqiState.board[row][col];
-  const selectedMove = xiangqiLegalMoves.find(move => move.row === row && move.col === col);
+  const selectedMove = xiangqiLegalMoves.find((move) => move.row === row && move.col === col);
   if (selectedMove && xiangqiSelected) {
     const captured = xiangqiState.board[row][col];
     const mover = xiangqiState.turn === "red" ? "Red" : "Black";
@@ -208,7 +274,9 @@ function handleXiangqiSquareClick(row, col) {
     xiangqiMatchStatus = "inProgress";
     xiangqiSelected = null;
     xiangqiLegalMoves = [];
-    message.textContent = captured ? `${mover} captured ${XIANGQI_PIECES[captured.color][captured.type]}.` : `${mover} moved.`;
+    message.textContent = captured
+      ? `${mover} captured ${XIANGQI_PIECES[captured.color][captured.type]}.`
+      : `${mover} moved.`;
     evaluateXiangqiGameEnd();
     renderXiangqiBoard();
     return;
@@ -217,7 +285,9 @@ function handleXiangqiSquareClick(row, col) {
     xiangqiMatchStatus = "inProgress";
     xiangqiSelected = { row, col };
     xiangqiLegalMoves = XiangqiEngine.getLegalMoves(xiangqiState, row, col);
-    message.textContent = xiangqiLegalMoves.length ? "Choose a highlighted destination." : "That piece has no legal moves.";
+    message.textContent = xiangqiLegalMoves.length
+      ? "Choose a highlighted destination."
+      : "That piece has no legal moves.";
   } else {
     xiangqiSelected = null;
     xiangqiLegalMoves = [];
@@ -230,8 +300,11 @@ function evaluateXiangqiGameEnd() {
   const result = XiangqiEngine.getGameResult(xiangqiState);
   if (result.finished) {
     xiangqiMatchStatus = "completed";
-    document.querySelector("#gameOverTitle").textContent = result.inCheck ? "CHECKMATE" : "NO LEGAL MOVES";
-    document.querySelector("#gameOverResult").textContent = `${result.winner === "red" ? "RED" : "BLACK"} WINS`;
+    document.querySelector("#gameOverTitle").textContent = result.inCheck
+      ? "CHECKMATE"
+      : "NO LEGAL MOVES";
+    document.querySelector("#gameOverResult").textContent =
+      `${result.winner === "red" ? "RED" : "BLACK"} WINS`;
     gameOverModal.hidden = false;
   } else if (result.inCheck) {
     message.textContent = `${xiangqiState.turn === "red" ? "Red" : "Black"} is in check.`;
@@ -245,13 +318,18 @@ function handleSquareClick(row, col) {
   }
   if (state.gameOver || state.pendingPromotion) return;
   const clickedPiece = state.board[row][col];
-  const selectedMove = state.legalMoves.find(move => move.row === row && move.col === col);
-  if (selectedMove) { executeMove(selectedMove); return; }
+  const selectedMove = state.legalMoves.find((move) => move.row === row && move.col === col);
+  if (selectedMove) {
+    executeMove(selectedMove);
+    return;
+  }
   if (clickedPiece && clickedPiece.color === state.turn) {
     state.matchStatus = "inProgress";
     state.selected = { row, col };
     state.legalMoves = getLegalMoves(state, row, col);
-    message.textContent = state.legalMoves.length ? "Choose a highlighted destination." : "That piece has no legal moves.";
+    message.textContent = state.legalMoves.length
+      ? "Choose a highlighted destination."
+      : "That piece has no legal moves.";
   } else {
     state.selected = null;
     state.legalMoves = [];
@@ -269,7 +347,7 @@ function handleSquareClick(row, col) {
 function getLegalMoves(source, row, col) {
   const piece = source.board[row][col];
   if (!piece || piece.color !== source.turn) return [];
-  return getPseudoMoves(source, row, col).filter(move => {
+  return getPseudoMoves(source, row, col).filter((move) => {
     const next = cloneState(source);
     next.from = { row, col };
     applyMove(next, move, "q");
@@ -281,7 +359,8 @@ function getAllLegalMoves(source, color) {
   const originalTurn = source.turn;
   source.turn = color;
   const moves = [];
-  for (let row = 0; row < 8; row += 1) for (let col = 0; col < 8; col += 1) moves.push(...getLegalMoves(source, row, col));
+  for (let row = 0; row < 8; row += 1)
+    for (let col = 0; col < 8; col += 1) moves.push(...getLegalMoves(source, row, col));
   source.turn = originalTurn;
   return moves;
 }
@@ -323,25 +402,59 @@ function getPseudoMoves(source, row, col, attacksOnly = false) {
       if (target && target.color !== piece.color && target.type !== "k") {
         moves.push({ row: targetRow, col: targetCol, capture: true });
       }
-      if (!attacksOnly && source.enPassant && source.enPassant.row === targetRow && source.enPassant.col === targetCol) {
+      if (
+        !attacksOnly &&
+        source.enPassant &&
+        source.enPassant.row === targetRow &&
+        source.enPassant.col === targetCol
+      ) {
         moves.push({ row: targetRow, col: targetCol, capture: true, enPassant: true });
       }
     }
   }
 
   if (piece.type === "n") {
-    const knightSteps = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+    const knightSteps = [
+      [-2, -1],
+      [-2, 1],
+      [-1, -2],
+      [-1, 2],
+      [1, -2],
+      [1, 2],
+      [2, -1],
+      [2, 1],
+    ];
     for (const [rowDelta, colDelta] of knightSteps) {
       addMove(moves, source, row, col, row + rowDelta, col + colDelta);
     }
   }
 
   if (["b", "r", "q"].includes(piece.type)) {
-    const directions = piece.type === "b"
-      ? [[-1, -1], [-1, 1], [1, -1], [1, 1]]
-      : piece.type === "r"
-        ? [[-1, 0], [1, 0], [0, -1], [0, 1]]
-        : [[-1, -1], [-1, 1], [1, -1], [1, 1], [-1, 0], [1, 0], [0, -1], [0, 1]];
+    const directions =
+      piece.type === "b"
+        ? [
+            [-1, -1],
+            [-1, 1],
+            [1, -1],
+            [1, 1],
+          ]
+        : piece.type === "r"
+          ? [
+              [-1, 0],
+              [1, 0],
+              [0, -1],
+              [0, 1],
+            ]
+          : [
+              [-1, -1],
+              [-1, 1],
+              [1, -1],
+              [1, 1],
+              [-1, 0],
+              [1, 0],
+              [0, -1],
+              [0, 1],
+            ];
 
     for (const [rowDelta, colDelta] of directions) {
       let targetRow = row + rowDelta;
@@ -363,7 +476,16 @@ function getPseudoMoves(source, row, col, attacksOnly = false) {
   }
 
   if (piece.type === "k") {
-    const kingSteps = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+    const kingSteps = [
+      [-1, -1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [0, 1],
+      [1, -1],
+      [1, 0],
+      [1, 1],
+    ];
     for (const [rowDelta, colDelta] of kingSteps) {
       addMove(moves, source, row, col, row + rowDelta, col + colDelta);
     }
@@ -377,9 +499,18 @@ function getPseudoMoves(source, row, col, attacksOnly = false) {
         const rook = source.board[row][rookCol];
         const clear = side === "king" ? [5, 6] : [1, 2, 3];
         const safe = side === "king" ? [5, 6] : [3, 2];
-        const pathIsClear = clear.every(targetCol => !source.board[row][targetCol]);
-        const pathIsSafe = safe.every(targetCol => !isSquareAttacked(source.board, row, targetCol, otherColor(piece.color)));
-        if (rook && rook.color === piece.color && rook.type === "r" && !rook.moved && pathIsClear && pathIsSafe) {
+        const pathIsClear = clear.every((targetCol) => !source.board[row][targetCol]);
+        const pathIsSafe = safe.every(
+          (targetCol) => !isSquareAttacked(source.board, row, targetCol, otherColor(piece.color))
+        );
+        if (
+          rook &&
+          rook.color === piece.color &&
+          rook.type === "r" &&
+          !rook.moved &&
+          pathIsClear &&
+          pathIsSafe
+        ) {
           moves.push({ row, col: col + step * 2, castle: side });
         }
       }
@@ -400,12 +531,25 @@ function isSquareAttacked(board, row, col, byColor) {
       const absoluteRow = Math.abs(rowDelta);
       const absoluteCol = Math.abs(colDelta);
       if (piece.type === "p" && rowDelta === direction && absoluteCol === 1) return true;
-      if (piece.type === "n" && ((absoluteRow === 2 && absoluteCol === 1) || (absoluteRow === 1 && absoluteCol === 2))) return true;
-      if (piece.type === "k" && absoluteRow <= 1 && absoluteCol <= 1 && (absoluteRow || absoluteCol)) return true;
+      if (
+        piece.type === "n" &&
+        ((absoluteRow === 2 && absoluteCol === 1) || (absoluteRow === 1 && absoluteCol === 2))
+      )
+        return true;
+      if (
+        piece.type === "k" &&
+        absoluteRow <= 1 &&
+        absoluteCol <= 1 &&
+        (absoluteRow || absoluteCol)
+      )
+        return true;
 
       const diagonal = absoluteRow === absoluteCol && absoluteRow > 0;
       const straight = (rowDelta === 0) !== (colDelta === 0);
-      const attacksLine = (piece.type === "b" && diagonal) || (piece.type === "r" && straight) || (piece.type === "q" && (diagonal || straight));
+      const attacksLine =
+        (piece.type === "b" && diagonal) ||
+        (piece.type === "r" && straight) ||
+        (piece.type === "q" && (diagonal || straight));
       if (!attacksLine) continue;
 
       const stepRow = Math.sign(rowDelta);
@@ -463,7 +607,9 @@ function applyMove(targetState, move, promotionType = "q") {
   piece.moved = true;
   if (piece.type === "p" && (move.row === 0 || move.row === 7)) piece.type = promotionType;
   targetState.board[move.row][move.col] = piece;
-  targetState.enPassant = move.pawnDouble ? { row: (from.row + move.row) / 2, col: from.col } : null;
+  targetState.enPassant = move.pawnDouble
+    ? { row: (from.row + move.row) / 2, col: from.col }
+    : null;
   return targetState;
 }
 
@@ -472,7 +618,10 @@ function executeMove(move) {
   next.from = state.selected;
 
   // Promotion pauses the turn until the player chooses the new piece.
-  if (state.board[state.selected.row][state.selected.col].type === "p" && (move.row === 0 || move.row === 7)) {
+  if (
+    state.board[state.selected.row][state.selected.col].type === "p" &&
+    (move.row === 0 || move.row === 7)
+  ) {
     applyMove(next, move, "q");
     state.pendingPromotion = { next, move };
     showPromotionChoices(state.turn);
@@ -505,7 +654,11 @@ function showPromotionChoices(color) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "promotion-choice";
-    button.innerHTML = `<span class="promotion-piece">${PIECES[PIECE_STYLE][color][type]}</span>${{ q: "Queen", r: "Rook", b: "Bishop", n: "Knight" }[type]}`;
+    const pieceElement = createCssChessPiece();
+    updateCssChessPiece(pieceElement, { color, type });
+    pieceElement.classList.add("promotion-piece");
+    button.appendChild(pieceElement);
+    button.appendChild(document.createTextNode(CHESS_PIECE_NAMES[type]));
     button.addEventListener("click", () => {
       const promotion = state.pendingPromotion;
       promotion.next.board[promotion.move.row][promotion.move.col].type = type;
@@ -528,7 +681,9 @@ function evaluateGameEnd() {
   const inCheck = isInCheck(state.board, state.turn);
   state.matchStatus = "completed";
   document.querySelector("#gameOverTitle").textContent = inCheck ? "CHECKMATE" : "STALEMATE";
-  document.querySelector("#gameOverResult").textContent = inCheck ? `${state.turn === "w" ? "BLACK" : "WHITE"} WINS` : "DRAW";
+  document.querySelector("#gameOverResult").textContent = inCheck
+    ? `${state.turn === "w" ? "BLACK" : "WHITE"} WINS`
+    : "DRAW";
   gameOverModal.hidden = false;
   renderBoard();
 }
@@ -551,13 +706,58 @@ function resetGame() {
 
 function updateVariantInterface() {
   const isEnglish = activeVariant === "english";
-  gameTitle.textContent = isEnglish ? "ENGLISH CHESS ♟️" : "CHINESE CHESS · 中国象棋";
+  gameTitle.textContent = isEnglish ? "ENGLISH CHESS" : "CHINESE CHESS · 中国象棋";
   document.title = isEnglish ? "English Chess | JavanOffice" : "Chinese Chess | JavanOffice";
-  switchVariantButton.textContent = isEnglish ? "Switch to Chinese Chess" : "Switch to English Chess";
-  boardElement.setAttribute("aria-label", isEnglish ? "English chess board" : "Chinese chess board");
+  switchVariantButton.textContent = isEnglish
+    ? "Switch to Chinese Chess"
+    : "Switch to English Chess";
+  boardElement.setAttribute(
+    "aria-label",
+    isEnglish ? "English chess board" : "Chinese chess board"
+  );
+}
+
+function showGameSetup() {
+  const isEnglish = activeVariant === "english";
+  selectedPlayerSide = null;
+  promotionModal.hidden = true;
+  gameOverModal.hidden = true;
+  gameSetupTitle.textContent = isEnglish ? "Choose your side" : "选择你的棋方";
+  gameSetupMessage.textContent = isEnglish
+    ? "Choose which side to play as. White will remain at the bottom of the board."
+    : "请选择你要执的一方。棋盘始终保持红方在下。";
+  whiteSideButton.textContent = isEnglish ? "White" : "Red · 红方";
+  blackSideButton.textContent = isEnglish ? "Black" : "Black · 黑方";
+  whiteSideButton.setAttribute("aria-pressed", "false");
+  blackSideButton.setAttribute("aria-pressed", "false");
+  setupError.hidden = true;
+  setupError.textContent = "";
+  gameSetupModal.hidden = false;
+  whiteSideButton.focus();
+}
+
+function selectPlayerSide(side) {
+  selectedPlayerSide = side;
+  whiteSideButton.setAttribute(
+    "aria-pressed",
+    String(side === (activeVariant === "english" ? "w" : "red"))
+  );
+  blackSideButton.setAttribute(
+    "aria-pressed",
+    String(side === (activeVariant === "english" ? "b" : "black"))
+  );
+  setupError.hidden = true;
 }
 
 function startNewGame() {
+  if (!selectedPlayerSide) {
+    setupError.textContent = "Choose a side before starting the game.";
+    setupError.hidden = false;
+    whiteSideButton.focus();
+    return;
+  }
+
+  gameSetupModal.hidden = true;
   if (activeVariant === "english") {
     resetGame();
     state.matchStatus = "inProgress";
@@ -584,6 +784,7 @@ function switchVariant(variant) {
   xiangqiLegalMoves = [];
   updateVariantInterface();
   if (activeVariant === "xiangqi") renderXiangqiBoard();
+  showGameSetup();
 }
 
 function closeVariantConfirmation(returnFocus = true) {
@@ -603,8 +804,12 @@ function handleVariantDialogKeydown(event) {
     const focusedElement = document.activeElement;
     event.preventDefault();
     const nextButton = event.shiftKey
-      ? (focusedElement === cancelVariantButton ? confirmVariantButton : cancelVariantButton)
-      : (focusedElement === confirmVariantButton ? cancelVariantButton : confirmVariantButton);
+      ? focusedElement === cancelVariantButton
+        ? confirmVariantButton
+        : cancelVariantButton
+      : focusedElement === confirmVariantButton
+        ? cancelVariantButton
+        : confirmVariantButton;
     nextButton.focus();
   }
 }
@@ -628,8 +833,8 @@ function requestVariantSwitch() {
   document.addEventListener("keydown", handleVariantDialogKeydown);
 }
 
-document.querySelector("#resetButton").addEventListener("click", startNewGame);
-document.querySelector("#modalResetButton").addEventListener("click", startNewGame);
+document.querySelector("#resetButton").addEventListener("click", showGameSetup);
+document.querySelector("#modalResetButton").addEventListener("click", showGameSetup);
 document.querySelector("#gameOverSwitchButton").addEventListener("click", requestVariantSwitch);
 switchVariantButton.addEventListener("click", requestVariantSwitch);
 cancelVariantButton.addEventListener("click", () => closeVariantConfirmation());
@@ -640,9 +845,19 @@ confirmVariantButton.addEventListener("click", () => {
   switchVariant(target);
   switchVariantButton.focus();
 });
-variantConfirmModal.addEventListener("click", event => {
+variantConfirmModal.addEventListener("click", (event) => {
   if (event.target === variantConfirmModal) closeVariantConfirmation();
+});
+whiteSideButton.addEventListener("click", () =>
+  selectPlayerSide(activeVariant === "english" ? "w" : "red")
+);
+blackSideButton.addEventListener("click", () =>
+  selectPlayerSide(activeVariant === "english" ? "b" : "black")
+);
+startGameButton.addEventListener("click", startNewGame);
+cancelSetupButton.addEventListener("click", () => {
+  window.location.href = "../../index.html";
 });
 
 updateVariantInterface();
-resetGame();
+showGameSetup();

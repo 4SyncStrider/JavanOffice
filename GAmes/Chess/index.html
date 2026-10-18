@@ -1,78 +1,128 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Offline Chess</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <!-- The page is intentionally split into a small header, board, controls, and modal layer. -->
-  <main class="app-shell">
-    <a class="menu-link" href="../../index.html">← Main menu</a>
-    <header class="game-header">
-      <p class="eyebrow">LOCAL TWO-PLAYER GAME</p>
-      <h1 id="gameTitle">ENGLISH CHESS ♟️</h1>
-      <p id="turnStatus" class="turn-status" aria-live="polite">WHITE TO START</p>
-    </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline Chess</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- The page is intentionally split into a small header, board, controls, and modal layer. -->
+    <main class="app-shell">
+      <a class="menu-link" href="../../index.html">← Main menu</a>
+      <header class="game-header">
+        <p class="eyebrow">LOCAL TWO-PLAYER GAME</p>
+        <h1 id="gameTitle">ENGLISH CHESS</h1>
+        <p id="turnStatus" class="turn-status" aria-live="polite">WHITE TO START</p>
+      </header>
 
-    <!-- The table is the actual board; the surrounding assembly owns notation and rotation. -->
-    <section class="board-wrap" aria-label="Chess board area">
-      <div id="boardAssembly" class="board-assembly white-view">
-        <div class="rank-labels" aria-hidden="true">
-          <span>8</span><span>7</span><span>6</span><span>5</span>
-          <span>4</span><span>3</span><span>2</span><span>1</span>
+      <!-- The table is the actual board; the surrounding assembly owns notation and rotation. -->
+      <section class="board-wrap" aria-label="Chess board area">
+        <div id="boardAssembly" class="board-assembly white-view">
+          <div class="rank-labels" aria-hidden="true">
+            <span>8</span><span>7</span><span>6</span><span>5</span> <span>4</span><span>3</span
+            ><span>2</span><span>1</span>
+          </div>
+          <table id="chessBoard" class="chess-board" aria-label="Chess board">
+            <tbody></tbody>
+          </table>
+          <div class="file-labels" aria-hidden="true">
+            <span>a</span><span>b</span><span>c</span><span>d</span> <span>e</span><span>f</span
+            ><span>g</span><span>h</span>
+          </div>
+          <span id="riverLabel" hidden aria-hidden="true">楚河　汉界</span>
         </div>
-        <table id="chessBoard" class="chess-board" aria-label="Chess board">
-          <tbody></tbody>
-        </table>
-        <div class="file-labels" aria-hidden="true">
-          <span>a</span><span>b</span><span>c</span><span>d</span>
-          <span>e</span><span>f</span><span>g</span><span>h</span>
+      </section>
+
+      <div class="controls">
+        <button id="switchVariantButton" class="button" type="button">
+          Switch to Chinese Chess
+        </button>
+        <button id="resetButton" class="button" type="button">NEW GAME</button>
+        <p id="message" class="message" aria-live="polite">Select a piece to see legal moves.</p>
+      </div>
+    </main>
+
+    <!-- The setup dialog chooses the starting perspective before a match begins. -->
+    <div id="gameSetupModal" class="modal" hidden>
+      <section
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gameSetupTitle"
+        aria-describedby="gameSetupMessage"
+      >
+        <p class="eyebrow">NEW MATCH</p>
+        <h2 id="gameSetupTitle">Choose your side</h2>
+        <p id="gameSetupMessage">
+          Choose which side to play as. White will remain at the bottom of the board.
+        </p>
+        <div class="side-choices">
+          <button
+            id="whiteSideButton"
+            class="button side-choice"
+            type="button"
+            aria-pressed="false"
+          >
+            White
+          </button>
+          <button
+            id="blackSideButton"
+            class="button side-choice"
+            type="button"
+            aria-pressed="false"
+          >
+            Black
+          </button>
         </div>
-        <span id="riverLabel" hidden aria-hidden="true">楚河　汉界</span>
+        <p id="setupError" class="selection-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button id="startGameButton" class="button" type="button">Start Game</button>
+          <button id="cancelSetupButton" class="button cancel-choice" type="button">
+            Cancel · Main menu
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- These dialogs are toggled by JavaScript and block board interaction while open. -->
+    <div id="promotionModal" class="modal" hidden>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="promotionTitle">
+        <p class="eyebrow">PAWN PROMOTION</p>
+        <h2 id="promotionTitle">Choose a piece</h2>
+        <div id="promotionChoices" class="promotion-choices"></div>
       </div>
-    </section>
-
-    <div class="controls">
-      <button id="switchVariantButton" class="button" type="button">Switch to Chinese Chess</button>
-      <button id="resetButton" class="button" type="button">NEW GAME</button>
-      <p id="message" class="message" aria-live="polite">Select a piece to see legal moves.</p>
     </div>
-  </main>
 
-  <!-- These dialogs are toggled by JavaScript and block board interaction while open. -->
-  <div id="promotionModal" class="modal" hidden>
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="promotionTitle">
-      <p class="eyebrow">PAWN PROMOTION</p>
-      <h2 id="promotionTitle">Choose a piece</h2>
-      <div id="promotionChoices" class="promotion-choices"></div>
-    </div>
-  </div>
-
-  <div id="gameOverModal" class="modal" hidden>
-    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
-      <p class="eyebrow">GAME COMPLETE</p>
-      <h2 id="gameOverTitle">CHECKMATE</h2>
-      <p id="gameOverResult" class="game-over-result">WHITE WINS</p>
-      <button id="modalResetButton" class="button" type="button">RESET GAME</button>
-      <button id="gameOverSwitchButton" class="button" type="button">Switch Variant</button>
-    </div>
-  </div>
-
-  <div id="variantConfirmModal" class="modal" hidden>
-    <section class="modal-content" role="dialog" aria-modal="true" aria-labelledby="variantConfirmTitle" aria-describedby="variantConfirmMessage">
-      <p class="eyebrow">CHANGE GAME</p>
-      <h2 id="variantConfirmTitle">Switch game?</h2>
-      <p id="variantConfirmMessage"></p>
-      <div class="dialog-actions">
-        <button id="cancelVariantButton" class="button" type="button">Cancel</button>
-        <button id="confirmVariantButton" class="button" type="button">Switch Game</button>
+    <div id="gameOverModal" class="modal" hidden>
+      <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+        <p class="eyebrow">GAME COMPLETE</p>
+        <h2 id="gameOverTitle">CHECKMATE</h2>
+        <p id="gameOverResult" class="game-over-result">WHITE WINS</p>
+        <button id="modalResetButton" class="button" type="button">RESET GAME</button>
+        <button id="gameOverSwitchButton" class="button" type="button">Switch Variant</button>
       </div>
-    </section>
-  </div>
+    </div>
 
-  <script src="xiangqi.js"></script>
-  <script src="script.js"></script>
-</body>
+    <div id="variantConfirmModal" class="modal" hidden>
+      <section
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="variantConfirmTitle"
+        aria-describedby="variantConfirmMessage"
+      >
+        <p class="eyebrow">CHANGE GAME</p>
+        <h2 id="variantConfirmTitle">Switch game?</h2>
+        <p id="variantConfirmMessage"></p>
+        <div class="dialog-actions">
+          <button id="cancelVariantButton" class="button" type="button">Cancel</button>
+          <button id="confirmVariantButton" class="button" type="button">Switch Game</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="xiangqi.js"></script>
+    <script src="script.js"></script>
+  </body>
 </html>
