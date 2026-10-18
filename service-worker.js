@@ -1,4 +1,4 @@
-const CACHE_NAME = "javanoffice-pwa-v4";
+const CACHE_NAME = "javanoffice-pwa-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -23,6 +23,11 @@ const APP_SHELL = [
   "./GAmes/Flappy-bird/index.html",
   "./GAmes/Flappy-bird/style.css",
   "./GAmes/Flappy-bird/script.js",
+  "./GAmes/Flappy-bird/assets/back.png",
+  "./GAmes/Flappy-bird/assets/background-day.png",
+  "./GAmes/Flappy-bird/assets/background-night.png",
+  "./GAmes/Flappy-bird/assets/pipe-green.png",
+  "./GAmes/Flappy-bird/assets/yellowbird-upflap.png",
   "./GAmes/Google_dino/index.html",
   "./GAmes/Google_dino/phaser.min.js",
   "./GAmes/Google_dino/public/style.css",

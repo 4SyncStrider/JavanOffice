@@ -2,10 +2,14 @@
   const WIDTH = 480;
   const HEIGHT = 640;
   const GROUND_Y = 600;
+  const DAY_DURATION_MS = 5 * 60 * 1000;
+  const NIGHT_DURATION_MS = 2 * 60 * 1000;
+  const DAY_NIGHT_TRANSITION_MS = 4000;
+  const MAX_PIPE_CENTER_SHIFT = 64;
+  const PIPE_EDGE_CLEARANCE = 28;
   const statusElement = document.querySelector("#game-status");
   const scoreElement = document.querySelector("#score");
   const pauseButton = document.querySelector("#pause-button");
-  const restartButton = document.querySelector("#restart-button");
   let game;
   let scene;
 
@@ -15,24 +19,64 @@
       this.handleAction = this.handleAction.bind(this);
     }
 
+    preload() {
+      this.load.image("back", "assets/back.png");
+      this.load.image("day", "assets/background-day.png");
+      this.load.image("night", "assets/background-night.png");
+      this.load.image("pipe", "assets/pipe-green.png");
+      this.load.image("bird", "assets/yellowbird-upflap.png");
+      this.load.image("game-over", "../Google_dino/public/assests/game-over.png");
+    }
+
     create() {
       scene = this;
       this.mode = "ready";
       this.score = 0;
       this.speed = 190;
       this.pipeTimer = 0;
+      this.phaseElapsedMs = 0;
+      this.transitionElapsedMs = 0;
+      this.dayNightPhase = "day";
+      this.lastPipeCenter = null;
       this.pipes = [];
-      this.cameras.main.setBackgroundColor("#d7f1f5");
-      this.add.rectangle(WIDTH / 2, GROUND_Y + 20, WIDTH, 40, 0x759d57);
-      this.add.rectangle(WIDTH / 2, GROUND_Y, WIDTH, 4, 0x405d34);
-      this.add.ellipse(86, 155, 108, 24, 0xffffff, 0.65);
-      this.add.ellipse(360, 220, 124, 26, 0xffffff, 0.55);
+      this.cameras.main.setBackgroundColor("#4ec0ca");
+      this.dayBackground = this.add
+        .image(WIDTH / 2, HEIGHT / 2, "day")
+        .setDisplaySize(WIDTH, HEIGHT)
+        .setDepth(-20);
+      this.nightBackground = this.add
+        .image(WIDTH / 2, HEIGHT / 2, "night")
+        .setDisplaySize(WIDTH, HEIGHT)
+        .setAlpha(0)
+        .setDepth(-19);
+      this.add.rectangle(WIDTH / 2, GROUND_Y + 20, WIDTH, 40, 0x45bd45).setDepth(6);
+      this.add.rectangle(WIDTH / 2, GROUND_Y, WIDTH, 4, 0x278b32).setDepth(6);
 
-      this.bird = this.add.ellipse(140, 290, 32, 25, 0xf4d35e);
-      this.add.ellipse(149, 286, 5, 5, 0x17251c);
+      this.bird = this.add.image(140, 290, "bird").setDisplaySize(51, 36).setDepth(5);
       this.physics.add.existing(this.bird);
       this.bird.body.setAllowGravity(false);
       this.bird.body.setSize(25, 19).setOffset(3, 3);
+
+      this.gameOverShade = this.add
+        .rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x071b17, 0.55)
+        .setDepth(8)
+        .setVisible(false);
+      this.gameOverPanel = this.add
+        .rectangle(WIDTH / 2, HEIGHT / 2 - 42, 420, 78, 0xf4f7f4, 0.94)
+        .setDepth(9)
+        .setVisible(false);
+      this.gameOverImage = this.add
+        .image(WIDTH / 2, HEIGHT / 2 - 42, "game-over")
+        .setDisplaySize(380, 42)
+        .setDepth(10)
+        .setVisible(false);
+      this.backSprite = this.add
+        .image(WIDTH / 2, HEIGHT / 2 + 35, "back")
+        .setDisplaySize(52, 55)
+        .setDepth(11)
+        .setInteractive({ useHandCursor: true })
+        .setVisible(false);
+      this.backSprite.on("pointerdown", () => this.scene.restart());
 
       this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
       this.input.off("pointerdown", this.handleAction);
@@ -57,25 +101,69 @@
 
     spawnPipe(x) {
       const gap = Math.max(132, 178 - this.score * 1.8);
-      const center = Phaser.Math.Between(190, GROUND_Y - 100);
-      const pipeWidth = 64;
+      const minimumCenter = gap / 2 + PIPE_EDGE_CLEARANCE;
+      const maximumCenter = GROUND_Y - gap / 2 - PIPE_EDGE_CLEARANCE;
+      const minimumNextCenter =
+        this.lastPipeCenter === null
+          ? minimumCenter
+          : Math.max(minimumCenter, this.lastPipeCenter - MAX_PIPE_CENTER_SHIFT);
+      const maximumNextCenter =
+        this.lastPipeCenter === null
+          ? maximumCenter
+          : Math.min(maximumCenter, this.lastPipeCenter + MAX_PIPE_CENTER_SHIFT);
+      const center = Phaser.Math.Between(
+        Math.ceil(minimumNextCenter),
+        Math.floor(maximumNextCenter)
+      );
+      this.lastPipeCenter = center;
+      const pipeWidth = 68;
       const upperHeight = center - gap / 2;
       const lowerY = center + gap / 2;
       const upper = this.add
-        .rectangle(x, upperHeight / 2, pipeWidth, upperHeight, 0x2c8b57)
-        .setOrigin(0.5);
+        .image(x, upperHeight, "pipe")
+        .setOrigin(0.5, 1)
+        .setFlipY(true)
+        .setDisplaySize(pipeWidth, upperHeight)
+        .setDepth(3);
       const lowerHeight = GROUND_Y - lowerY;
       const lower = this.add
-        .rectangle(x, lowerY + lowerHeight / 2, pipeWidth, lowerHeight, 0x2c8b57)
-        .setOrigin(0.5);
-      this.add.rectangle(x, upperHeight - 7, pipeWidth + 12, 14, 0x237348);
-      this.add.rectangle(x, lowerY + 7, pipeWidth + 12, 14, 0x237348);
+        .image(x, lowerY, "pipe")
+        .setOrigin(0.5, 0)
+        .setDisplaySize(pipeWidth, lowerHeight)
+        .setDepth(3);
       this.pipes.push({ x, upper, lower, passed: false, center, gap, pipeWidth });
+    }
+
+    updateDayNightCycle(delta) {
+      if (this.dayNightPhase === "day" || this.dayNightPhase === "night") {
+        this.phaseElapsedMs += delta;
+        const phaseDuration = this.dayNightPhase === "day" ? DAY_DURATION_MS : NIGHT_DURATION_MS;
+        if (this.phaseElapsedMs < phaseDuration) return;
+
+        this.dayNightPhase = this.dayNightPhase === "day" ? "toNight" : "toDay";
+        this.transitionElapsedMs = 0;
+        return;
+      }
+
+      this.transitionElapsedMs += delta;
+      const progress = Phaser.Math.Clamp(this.transitionElapsedMs / DAY_NIGHT_TRANSITION_MS, 0, 1);
+      const easedProgress = Phaser.Math.Easing.Sine.InOut(progress);
+      const transitioningToNight = this.dayNightPhase === "toNight";
+      this.dayBackground.setAlpha(transitioningToNight ? 1 - easedProgress : easedProgress);
+      this.nightBackground.setAlpha(transitioningToNight ? easedProgress : 1 - easedProgress);
+
+      if (progress === 1) {
+        this.dayNightPhase = transitioningToNight ? "night" : "day";
+        this.phaseElapsedMs = 0;
+        this.transitionElapsedMs = 0;
+      }
     }
 
     update(_time, delta) {
       if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) this.handleAction();
       if (this.mode !== "playing") return;
+
+      this.updateDayNightCycle(delta);
 
       const elapsed = delta / 1000;
       this.pipeTimer += delta;
@@ -132,7 +220,11 @@
       this.mode = "over";
       this.bird.body.setAllowGravity(false);
       this.bird.body.setVelocity(0, 0);
-      statusElement.textContent = `Game over. Final score: ${this.score}. Restart to play again.`;
+      this.gameOverShade.setVisible(true);
+      this.gameOverPanel.setVisible(true);
+      this.gameOverImage.setVisible(true);
+      this.backSprite.setVisible(true);
+      statusElement.textContent = `Game over. Final score: ${this.score}.`;
       pauseButton.disabled = true;
     }
   }
@@ -165,19 +257,12 @@
     }
   };
 
-  const restartGame = () => {
-    if (scene?.mode === "paused") scene.scene.resume();
-    game.scene.start("flappy");
-  };
-
   pauseButton.addEventListener("click", pauseGame);
-  restartButton.addEventListener("click", restartGame);
 
   window.addEventListener(
     "pagehide",
     () => {
       pauseButton.removeEventListener("click", pauseGame);
-      restartButton.removeEventListener("click", restartGame);
       game?.destroy(true);
       game = null;
       scene = null;
