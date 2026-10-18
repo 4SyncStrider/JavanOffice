@@ -1,4 +1,4 @@
-const CACHE_NAME = "javanoffice-pwa-v3";
+const CACHE_NAME = "javanoffice-pwa-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const APP_SHELL = [
   "./service-worker.js",
   "./icons/icon-192.svg",
   "./icons/icon-512.svg",
+  "./icons/favicon.jpg",
   "./menu/menu.css",
   "./menu/menu.js",
   "./Tools/to-do/index.html",
