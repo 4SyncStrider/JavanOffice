@@ -10,15 +10,15 @@
   "theme_color": "#0b2b1c",
   "icons": [
     {
-      "src": "./icons/icon-192.svg",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
+      "src": "./icons/javan.png",
+      "sizes": "816x816",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "./icons/icon-512.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
+      "src": "./icons/JavanOffice.png",
+      "sizes": "1080x1080",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
