@@ -1,9 +1,9 @@
-@font-face{
-    font-family: 'Source Code Pro';
-    font-weight: 700;
-    font-style: normal;
-    font-stretch: normal;
-    src: url('../../../fonts/SourceCodePro-Bold.otf.woff2') format('woff2');  
+@font-face {
+  font-family: "Source Code Pro";
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: normal;
+  src: url("../../fonts/SourceCodePro-Bold.otf.woff2") format("woff2");
 }
 
 :root {
@@ -93,6 +93,7 @@ input {
 }
 
 .calc-display {
+  width: 100%;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -104,22 +105,86 @@ input {
   font-size: clamp(1.6rem, 4vw, 2.4rem);
   word-break: break-all;
   margin-bottom: 16px;
+  color: var(--text);
+  font-family: inherit;
+  text-align: right;
+}
+
+.calculator-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.calculator-heading h2 {
+  margin: 0;
+}
+
+.calculator-kicker {
+  margin: 0 0 4px;
+  color: var(--primary);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+
+.angle-mode {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
 }
 
 .calc-buttons {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
 }
 
 .calc-buttons button {
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.04);
   color: var(--text);
-  border-radius: 12px;
-  min-height: 52px;
+  border-radius: 9px;
+  min-width: 0;
+  min-height: 48px;
   cursor: pointer;
-  font-size: 1.1rem;
+  font-size: clamp(0.8rem, 1.4vw, 1.05rem);
+}
+
+.calc-buttons button:hover {
+  border-color: var(--primary);
+  background: rgba(123, 227, 255, 0.1);
+}
+
+.calc-buttons .calc-function-key {
+  background: rgba(123, 227, 255, 0.12);
+}
+
+.calc-buttons #alphaButton[aria-pressed="true"] {
+  border-color: #f0c000;
+  background: #f0c000;
+  color: #182b22;
+}
+
+.calc-buttons .key-spacer {
+  min-width: 0;
+}
+
+.calculate-formula-button {
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 12px;
+  background: rgba(123, 227, 255, 0.14);
+  color: var(--text);
+  cursor: pointer;
+}
+.calculate-formula-button:hover {
+  border-color: var(--primary);
+  background: rgba(123, 227, 255, 0.22);
 }
 
 .calc-buttons button[data-action="clear"] {
@@ -127,27 +192,10 @@ input {
 }
 
 .calc-buttons button[data-action="equals"] {
+  grid-column: span 5;
   background: var(--primary);
   color: #08251c;
   font-weight: 700;
-}
-
-.calculate-formula-button {
-  margin-top: 4px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 10px 12px;
-  background: rgba(123, 227, 255, 0.14);
-  color: var(--text);
-  cursor: pointer;
-}
-
-.wide {
-  grid-column: span 2;
-}
-
-.wide-span {
-  grid-column: span 4;
 }
 
 .field-label {
@@ -166,7 +214,8 @@ select,
   color: var(--text);
 }
 
-select, option {
+select,
+option {
   background-color: black;
 }
 

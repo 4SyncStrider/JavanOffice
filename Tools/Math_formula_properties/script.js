@@ -7,12 +7,22 @@
  */
 const display = document.querySelector("#calcDisplay");
 const calcButtons = document.querySelectorAll("[data-action]");
+const alphaButton = document.querySelector("#alphaButton");
 const shapeSelect = document.querySelector("#shapeSelect");
 const formulaInputs = document.querySelector("#formulaInputs");
 const formulaFormula = document.querySelector("#formulaFormula");
 const formulaAnswer = document.querySelector("#formulaAnswer");
 
 let calculatorValue = "";
+let alphaMode = false;
+
+const scientificFunctions = {
+  sin: Math.sin,
+  cos: Math.cos,
+  tan: Math.tan,
+  sqrt: Math.sqrt,
+  log: Math.log10,
+};
 
 const shapeDefinitions = {
   square: {
@@ -153,88 +163,91 @@ function formatNumber(value) {
   return string === "-0" ? "0" : string;
 }
 
-function flushDisplay() {
-  display.textContent = calculatorValue || "0";
+function flushDisplay(cursorPosition = calculatorValue.length) {
+  const visibleValue = calculatorValue || "0";
+  display.value = visibleValue;
+  const cursor = Math.min(Math.max(cursorPosition, 0), visibleValue.length);
+  display.setSelectionRange(cursor, cursor);
+}
+
+function insertAtCursor(text) {
+  if (calculatorValue === "Error") calculatorValue = "";
+
+  const start = Math.min(display.selectionStart ?? calculatorValue.length, calculatorValue.length);
+  const end = Math.min(display.selectionEnd ?? start, calculatorValue.length);
+  calculatorValue = calculatorValue.slice(0, start) + text + calculatorValue.slice(end);
+  flushDisplay(start + text.length);
+}
+
+function deleteAtCursor() {
+  if (calculatorValue === "Error") {
+    calculatorValue = "";
+    flushDisplay(0);
+    return;
+  }
+
+  let start = Math.min(display.selectionStart ?? calculatorValue.length, calculatorValue.length);
+  const end = Math.min(display.selectionEnd ?? start, calculatorValue.length);
+  if (start === end && start > 0) start -= 1;
+  calculatorValue = calculatorValue.slice(0, start) + calculatorValue.slice(end);
+  flushDisplay(start);
+}
+
+function moveCursor(offset) {
+  if (calculatorValue === "Error") return;
+  const cursor = Math.min(
+    Math.max((display.selectionStart ?? calculatorValue.length) + offset, 0),
+    calculatorValue.length
+  );
+  display.focus();
+  display.setSelectionRange(cursor, cursor);
 }
 
 calcButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    const action = button.dataset.action;
-    const value = button.dataset.value || "";
+    const { action, value = "" } = button.dataset;
 
     if (action === "clear") {
       calculatorValue = "";
-      flushDisplay();
-      return;
-    }
-
-    if (action === "delete") {
-      calculatorValue = calculatorValue.slice(0, -1);
-      flushDisplay();
-      return;
-    }
-
-    if (action === "equals") {
+      flushDisplay(0);
+    } else if (action === "delete") {
+      deleteAtCursor();
+    } else if (action === "cursor-left") {
+      moveCursor(-1);
+    } else if (action === "cursor-right") {
+      moveCursor(1);
+    } else if (action === "alpha") {
+      alphaMode = !alphaMode;
+      alphaButton.setAttribute("aria-pressed", String(alphaMode));
+    } else if (action === "equals") {
       try {
-        const result = evaluateExpression(calculatorValue);
-        calculatorValue = String(result);
+        calculatorValue = String(evaluateExpression(calculatorValue));
       } catch {
         calculatorValue = "Error";
       }
       flushDisplay();
-      return;
-    }
-
-    if (action === "digit") {
-      if (calculatorValue === "Error") {
-        calculatorValue = "";
-      }
-      calculatorValue += value;
-      flushDisplay();
-      return;
-    }
-
-    if (action === "operator") {
-      if (calculatorValue === "Error") {
-        calculatorValue = "";
-      }
-      if (!calculatorValue) {
-        if (value === "-") calculatorValue = "-";
-        flushDisplay();
-        return;
-      }
-      const last = calculatorValue.slice(-1);
-      if (/[+\-*\/]/.test(last)) {
+    } else if (action === "operator") {
+      if (calculatorValue === "Error") calculatorValue = "";
+      const cursor = Math.min(
+        display.selectionStart ?? calculatorValue.length,
+        calculatorValue.length
+      );
+      const previous = calculatorValue[cursor - 1];
+      if (cursor === calculatorValue.length && /[+\-*/]/.test(previous || "")) {
         calculatorValue = calculatorValue.slice(0, -1) + value;
-      } else {
-        calculatorValue += value;
+        flushDisplay();
+      } else if (calculatorValue || value === "-") {
+        insertAtCursor(value);
       }
-      flushDisplay();
-      return;
-    }
-
-    if (action === "parentheses") {
-      if (calculatorValue === "Error") calculatorValue = "";
-      calculatorValue += value;
-      flushDisplay();
-      return;
-    }
-
-    if (action === "percent") {
-      if (calculatorValue === "Error") calculatorValue = "";
-      if (!calculatorValue || /[+\-*/(]$/.test(calculatorValue)) {
-        calculatorValue += "0%";
-      } else {
-        calculatorValue += "%";
-      }
-      flushDisplay();
+    } else if (action === "function") {
+      insertAtCursor(`${value}(`);
+    } else if (action === "constant") {
+      insertAtCursor(alphaMode ? "e" : "π");
+    } else if (action === "digit" || action === "parentheses" || action === "percent") {
+      insertAtCursor(value);
     }
   });
 });
-
-function isDigit(char) {
-  return /[0-9.]/.test(char);
-}
 
 function tokenizeExpression(expression) {
   const tokens = [];
@@ -247,16 +260,37 @@ function tokenizeExpression(expression) {
       continue;
     }
 
-    if (isDigit(char)) {
-      let numberText = "";
-      while (index < expression.length && /[0-9.]/.test(expression[index])) {
-        numberText += expression[index];
+    const numberMatch = expression
+      .slice(index)
+      .match(/^(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?/);
+    if (numberMatch) {
+      const numberText = numberMatch[0];
+      index += numberText.length;
+      if (/[\d.]/.test(expression[index] || "")) throw new Error("Malformed number");
+      tokens.push({ type: "number", value: Number(numberText) });
+      continue;
+    }
+
+    if (char === "π") {
+      tokens.push({ type: "constant", value: "pi" });
+      index += 1;
+      continue;
+    }
+
+    if (/[a-z]/i.test(char)) {
+      let name = "";
+      while (/[a-z]/i.test(expression[index] || "")) {
+        name += expression[index];
         index += 1;
       }
-      if (numberText.split(".").length > 2) {
-        throw new Error("Malformed number");
+      name = name.toLowerCase();
+      if (name === "e") {
+        tokens.push({ type: "constant", value: "e" });
+      } else if (Object.hasOwn(scientificFunctions, name)) {
+        tokens.push({ type: "function", value: name });
+      } else {
+        throw new Error("Unknown function or constant");
       }
-      tokens.push({ type: "number", value: Number(numberText) });
       continue;
     }
 
@@ -275,7 +309,7 @@ function tokenizeExpression(expression) {
 function evaluateExpression(expression) {
   const sanitized = expression.trim();
   if (!sanitized) return 0;
-  if (!/^[0-9+\-*/().%\s]+$/.test(sanitized)) {
+  if (!/^[0-9a-zA-Zπ+\-*/().%\s]+$/i.test(sanitized)) {
     throw new Error("Invalid input");
   }
 
@@ -306,6 +340,21 @@ function evaluateExpression(expression) {
       return token.value;
     }
 
+    if (token.type === "constant") {
+      position += 1;
+      return token.value === "pi" ? Math.PI : Math.E;
+    }
+
+    if (token.type === "function") {
+      position += 1;
+      consume("(");
+      const argument = parseAddSubtract();
+      consume(")");
+      const result = scientificFunctions[token.value](argument);
+      if (!Number.isFinite(result)) throw new Error("Invalid function result");
+      return result;
+    }
+
     if (token.type === "(") {
       consume("(");
       const value = parseAddSubtract();
@@ -329,18 +378,21 @@ function evaluateExpression(expression) {
   function parseMultiplyDivide() {
     let value = parsePrimary();
 
-    while (peek() && (peek().type === "*" || peek().type === "/" || peek().type === "%")) {
+    while (peek()) {
       const operator = peek().type;
-      position += 1;
-
-      const next = parsePrimary();
-      if (operator === "*") value *= next;
-      if (operator === "/") {
-        if (next === 0) throw new Error("Division by zero");
-        value /= next;
-      }
-      if (operator === "%") {
-        value = (value / 100) * next;
+      if (operator === "*" || operator === "/" || operator === "%") {
+        position += 1;
+        const next = parsePrimary();
+        if (operator === "*") value *= next;
+        if (operator === "/") {
+          if (next === 0) throw new Error("Division by zero");
+          value /= next;
+        }
+        if (operator === "%") value = (value / 100) * next;
+      } else if (["number", "(", "constant", "function"].includes(operator)) {
+        value *= parsePrimary();
+      } else {
+        break;
       }
     }
 
@@ -447,3 +499,4 @@ function updateFormulaResult() {
 
 shapeSelect.addEventListener("change", renderFormulaInputs);
 renderFormulaInputs();
+flushDisplay(0);

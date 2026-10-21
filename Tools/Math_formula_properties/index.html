@@ -21,33 +21,70 @@
 
       <main class="math-layout">
         <section class="panel calculator-panel">
-          <h2>Calculator</h2>
-          <div id="calcDisplay" class="calc-display" aria-live="polite">0</div>
+          <div class="calculator-heading">
+            <div>
+              <p class="calculator-kicker">JAVANOFFICE SCIENTIFIC</p>
+              <h2>Calculator</h2>
+            </div>
+            <span class="angle-mode" aria-label="Angle mode: radians">RAD</span>
+          </div>
+          <label class="sr-only" for="calcDisplay">Calculator expression</label>
+          <input
+            id="calcDisplay"
+            class="calc-display"
+            type="text"
+            value="0"
+            readonly
+            inputmode="none"
+            aria-live="polite"
+          />
           <div class="calc-buttons">
-            <button type="button" data-action="clear">C</button>
-            <button type="button" data-action="delete">⌫</button>
+            <button type="button" data-action="clear" class="calc-function-key">AC</button>
+            <button type="button" data-action="delete" class="calc-function-key">DEL</button>
+            <button
+              id="alphaButton"
+              type="button"
+              data-action="alpha"
+              aria-pressed="false"
+              class="calc-function-key"
+            >
+              ALPHA
+            </button>
+            <button type="button" data-action="cursor-left" aria-label="Move cursor left">←</button>
+            <button type="button" data-action="cursor-right" aria-label="Move cursor right">
+              →
+            </button>
+
+            <button type="button" data-action="function" data-value="sin">sin</button>
+            <button type="button" data-action="function" data-value="cos">cos</button>
+            <button type="button" data-action="function" data-value="tan">tan</button>
+            <button type="button" data-action="function" data-value="sqrt">√</button>
+            <button type="button" data-action="function" data-value="log">log</button>
+
+            <button type="button" data-action="parentheses" data-value="(">(</button>
+            <button type="button" data-action="parentheses" data-value=")">)</button>
+            <button type="button" data-action="constant" data-value="pi">π / e</button>
             <button type="button" data-action="percent">%</button>
-            <button type="button" data-action="operator" data-value="/">÷</button>
+            <span class="key-spacer" aria-hidden="true"></span>
 
             <button type="button" data-action="digit" data-value="7">7</button>
             <button type="button" data-action="digit" data-value="8">8</button>
             <button type="button" data-action="digit" data-value="9">9</button>
+            <button type="button" data-action="operator" data-value="/">÷</button>
             <button type="button" data-action="operator" data-value="*">×</button>
 
             <button type="button" data-action="digit" data-value="4">4</button>
             <button type="button" data-action="digit" data-value="5">5</button>
             <button type="button" data-action="digit" data-value="6">6</button>
             <button type="button" data-action="operator" data-value="-">−</button>
+            <button type="button" data-action="operator" data-value="+">+</button>
 
             <button type="button" data-action="digit" data-value="1">1</button>
             <button type="button" data-action="digit" data-value="2">2</button>
             <button type="button" data-action="digit" data-value="3">3</button>
-            <button type="button" data-action="operator" data-value="+">+</button>
-
-            <button type="button" data-action="digit" data-value="0" class="wide">0</button>
+            <button type="button" data-action="digit" data-value="0">0</button>
             <button type="button" data-action="digit" data-value=".">.</button>
-            <button type="button" data-action="parentheses" data-value="(">(</button>
-            <button type="button" data-action="parentheses" data-value=")">)</button>
+
             <button type="button" data-action="equals" class="wide-span">=</button>
           </div>
         </section>
