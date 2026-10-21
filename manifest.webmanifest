@@ -12,14 +12,26 @@
     {
       "src": "./icons/javan.png",
       "sizes": "816x816",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     },
     {
       "src": "./icons/JavanOffice.png",
       "sizes": "1080x1080",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+       "src": "screenshots/desktop.png",
+       "type": "image/png",
+       "form_factor": "wide",
+       "sizes": "1914x907"
+    }, 
+    {
+      "src": "screenshots/mobile.png",
       "type": "image/png",
-      "purpose": "any maskable"
+      "form_factor": "narrow",
+      "sizes": "713x1360"
     }
   ]
 }

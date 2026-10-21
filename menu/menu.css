@@ -166,6 +166,10 @@ h2 {
   text-align: center;
 }
 
+pre {
+  padding: 35px;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -193,5 +197,9 @@ h2 {
 
   .nav-link {
     min-width: 94px;
+  }
+
+  pre {
+    font-size: large;
   }
 }
