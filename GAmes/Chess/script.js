@@ -159,6 +159,7 @@ function ensureEnglishBoard() {
 // Black and counter-rotates piece artwork and notation to keep them readable.
 function renderBoard() {
   ensureEnglishBoard();
+  document.body.classList.remove("xiangqi-active");
   boardElement.classList.remove("xiangqi-mode");
   boardAssembly.classList.remove("xiangqi-view");
   riverLabel.hidden = true;
@@ -200,6 +201,7 @@ function renderBoard() {
 }
 
 function renderXiangqiBoard() {
+  document.body.classList.add("xiangqi-active");
   boardBody.innerHTML = "";
   boardElement.classList.add("xiangqi-mode");
   boardAssembly.classList.toggle("black-view", xiangqiState.turn === "black");
