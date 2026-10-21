@@ -73,14 +73,6 @@ export class MathUtils {
     return Math.PI * Math.pow(radius, 2);
   }
 
-  static areaOfRectangle(length: number, width: number) {
-    return length * width;
-  }
-
-  static areaOfSquare(side: number) {
-    return Math.pow(side, 2);
-  }
-
   static Pi = Math.PI;
 
   static e = Math.E;
