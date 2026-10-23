@@ -1,4 +1,4 @@
-const CACHE_NAME = "javanoffice-pwa-v7";
+const CACHE_NAME = "javanoffice-pwa-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -19,7 +19,7 @@ const APP_SHELL = [
   "./node_modules/opencc-js/dist/esm/full.js",
   "./Tools/Math_formula_properties/index.html",
   "./Tools/Math_formula_properties/style.css",
-  "./Tools/Math_formula_properties/script.js",
+  "./Tools/Math_formula_properties/formulas.js",
   "./fonts/SourceCodePro-Bold.otf.woff2",
   "./GAmes/Flappy-bird/index.html",
   "./GAmes/Flappy-bird/style.css",
