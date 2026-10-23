@@ -10,8 +10,6 @@ npmPackages/
 
 Chess_test_server/
 
-info/
-
 package-lock.json
 package.json
 
@@ -19,9 +17,4 @@ test.js
 
 instruction.md
 
-manifest.webmanifest
-pwa-register.js
-service-worker.js
 
-
-cal/
