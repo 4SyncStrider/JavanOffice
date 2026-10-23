@@ -1,120 +1,58 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0b2b1c" />
-    <link rel="manifest" href="../../manifest.webmanifest" />
-    <link rel="icon" type="image/png" href="../../icons/javan.png" />
-    <title>Calculator & Formulas | JavanOffice</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="tool-shell">
-      <header class="tool-header">
-        <a class="back-link" href="../../index.html">← Main menu</a>
-        <div class="header-copy">
-          <p class="eyebrow">JAVANOFFICE TOOLS</p>
-          <h1>Calculator & Formulas</h1>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b2b1c" />
+  <link rel="manifest" href="../../manifest.webmanifest" />
+  <link rel="icon" type="image/png" href="../../icons/javan.png" />
+  <title>Calculator & Formulas | JavanOffice</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="tool-shell">
+    <header class="tool-header">
+      <a class="back-link" href="../../index.html">← Main menu</a>
+      <div class="header-copy">
+        <p class="eyebrow">JAVANOFFICE TOOLS</p>
+        <h1>Calculator & Formulas</h1>
+      </div>
+    </header>
+
+    <main class="math-layout">
+      <section class="panel formula-panel">
+        <h2>Formula calculator</h2>
+        <label class="field-label" for="shapeSelect">Select a formula for...</label>
+        <select id="shapeSelect">
+          <option value="Triangle">Triangle</option>
+          <option value="circle">Circle</option>
+          <option value="cube">Cube</option>
+          <option value="cuboid">Cuboid</option>
+          <option value="sphere">Sphere</option>
+          <option value="cylinder">Cylinder</option>
+          <option value="cone">Cone</option>
+          <option value="quadratic-formula">quadratic-formula</option>
+          <option value="simple-interest">
+
+          </option>
+        </select>
+
+        <div id="formulaInputs" class="formula-inputs"></div>
+
+        <div class="formula-result-box">
+          <h3>Result</h3>
+          <p id="formulaFormula" class="formula-text"></p>
+          <p id="formulaAnswer" class="answer-text">Choose a shape to begin.</p>
         </div>
-      </header>
+      </section>
+    </main>
+  </div>
 
-      <main class="math-layout">
-        <section class="panel calculator-panel">
-          <div class="calculator-heading">
-            <div>
-              <p class="calculator-kicker">JAVANOFFICE SCIENTIFIC</p>
-              <h2>Calculator</h2>
-            </div>
-            <span class="angle-mode" aria-label="Angle mode: radians">RAD</span>
-          </div>
-          <label class="sr-only" for="calcDisplay">Calculator expression</label>
-          <input
-            id="calcDisplay"
-            class="calc-display"
-            type="text"
-            value="0"
-            readonly
-            inputmode="none"
-            aria-live="polite"
-          />
-          <div class="calc-buttons">
-            <button type="button" data-action="clear" class="calc-function-key">AC</button>
-            <button type="button" data-action="delete" class="calc-function-key">DEL</button>
-            <button
-              id="alphaButton"
-              type="button"
-              data-action="alpha"
-              aria-pressed="false"
-              class="calc-function-key"
-            >
-              ALPHA
-            </button>
-            <button type="button" data-action="cursor-left" aria-label="Move cursor left">←</button>
-            <button type="button" data-action="cursor-right" aria-label="Move cursor right">
-              →
-            </button>
+  <script type="module" src="formulas.js"></script>
+  <script type="module" src="calculator.js"></script>
+  <script type="module" src="../../pwa-register.js"></script>
+</body>
 
-            <button type="button" data-action="function" data-value="sin">sin</button>
-            <button type="button" data-action="function" data-value="cos">cos</button>
-            <button type="button" data-action="function" data-value="tan">tan</button>
-            <button type="button" data-action="function" data-value="sqrt">√</button>
-            <button type="button" data-action="function" data-value="log">log</button>
-
-            <button type="button" data-action="parentheses" data-value="(">(</button>
-            <button type="button" data-action="parentheses" data-value=")">)</button>
-            <button type="button" data-action="constant" data-value="pi">π / e</button>
-            <button type="button" data-action="percent">%</button>
-            <span class="key-spacer" aria-hidden="true"></span>
-
-            <button type="button" data-action="digit" data-value="7">7</button>
-            <button type="button" data-action="digit" data-value="8">8</button>
-            <button type="button" data-action="digit" data-value="9">9</button>
-            <button type="button" data-action="operator" data-value="/">÷</button>
-            <button type="button" data-action="operator" data-value="*">×</button>
-
-            <button type="button" data-action="digit" data-value="4">4</button>
-            <button type="button" data-action="digit" data-value="5">5</button>
-            <button type="button" data-action="digit" data-value="6">6</button>
-            <button type="button" data-action="operator" data-value="-">−</button>
-            <button type="button" data-action="operator" data-value="+">+</button>
-
-            <button type="button" data-action="digit" data-value="1">1</button>
-            <button type="button" data-action="digit" data-value="2">2</button>
-            <button type="button" data-action="digit" data-value="3">3</button>
-            <button type="button" data-action="digit" data-value="0">0</button>
-            <button type="button" data-action="digit" data-value=".">.</button>
-
-            <button type="button" data-action="equals" class="wide-span">=</button>
-          </div>
-        </section>
-
-        <section class="panel formula-panel">
-          <h2>Formula calculator</h2>
-          <label class="field-label" for="shapeSelect">Select a formula for...</label>
-          <select id="shapeSelect">
-            <option value="triangle">Triangle</option>
-            <option value="circle">Circle</option>
-            <option value="cube">Cube</option>
-            <option value="cuboid">Cuboid</option>
-            <option value="sphere">Sphere</option>
-            <option value="cylinder">Cylinder</option>
-            <option value="cone">Cone</option>
-            <option value="quadratic-formula">quadratic-formula</option>
-          </select>
-
-          <div id="formulaInputs" class="formula-inputs"></div>
-
-          <div class="formula-result-box">
-            <h3>Result</h3>
-            <p id="formulaFormula" class="formula-text"></p>
-            <p id="formulaAnswer" class="answer-text">Choose a shape to begin.</p>
-          </div>
-        </section>
-      </main>
-    </div>
-
-    <script src="script.js"></script>
-    <script type="module" src="../../pwa-register.js"></script>
-  </body>
 </html>
