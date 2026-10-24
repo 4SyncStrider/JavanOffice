@@ -16,6 +16,7 @@
   --muted: rgba(255, 255, 255, 0.74);
   --border: rgba(255, 255, 255, 0.12);
   --danger: #ff8b88;
+  --shadow: rgba(0, 0, 0, 0.18);
 }
 
 * {
@@ -44,26 +45,38 @@ input {
   font: inherit;
 }
 
+button,
+select,
+input {
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
 .tool-shell {
-  width: min(1100px, 100%);
+  width: min(1200px, 100%);
 }
 
 .tool-header {
   display: flex;
   align-items: center;
   gap: 18px;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 
 .back-link {
   color: var(--text);
   text-decoration: none;
   font-weight: 700;
+  opacity: 0.9;
+}
+
+.back-link:hover {
+  opacity: 1;
 }
 
 .header-copy h1 {
   margin: 0;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(2.1rem, 4vw, 3.45rem);
+  line-height: 1.1;
 }
 
 .eyebrow {
@@ -75,8 +88,8 @@ input {
 
 .math-layout {
   display: grid;
-  grid-template-columns: minmax(300px, 1.1fr) minmax(300px, 0.9fr);
-  gap: 18px;
+  grid-template-columns: minmax(320px, 1.05fr) minmax(320px, 0.95fr);
+  gap: 20px;
 }
 
 .panel {
@@ -84,44 +97,29 @@ input {
   border: 1px solid var(--border);
   border-radius: 24px;
   padding: 18px;
-  box-shadow: 0 18px 24px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 18px 24px var(--shadow);
 }
 
-.panel h2,
+.panel-header h2,
+.formula-overview h2,
 .formula-result-box h3 {
   margin-top: 0;
 }
 
-.angle-mode {
-  padding: 5px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--muted);
-  font-size: 0.72rem;
-}
-
-.calculate-formula-button {
-  margin-top: 4px;
-  border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 10px 12px;
-  background: rgba(123, 227, 255, 0.14);
-  color: var(--text);
-  cursor: pointer;
-}
-.calculate-formula-button:hover {
-  border-color: var(--primary);
-  background: rgba(123, 227, 255, 0.22);
+.selector-controls {
+  display: grid;
+  gap: 10px;
 }
 
 .field-label {
   display: block;
-  margin: 12px 0 8px;
+  margin: 10px 0 4px;
   color: var(--muted);
+  font-size: 0.78rem;
 }
 
 select,
-.formula-inputs input {
+input {
   width: 100%;
   padding: 10px 12px;
   border-radius: 10px;
@@ -132,20 +130,120 @@ select,
 
 select,
 option {
-  background-color: black;
+  background-color: #0b2b1c;
+}
+
+input::placeholder {
+  color: rgba(255, 255, 255, 0.46);
+}
+
+select:focus,
+input:focus,
+.calculate-formula-button:focus,
+.secondary-button:focus,
+.formula-card:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.formula-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.formula-card {
+  display: grid;
+  text-align: left;
+  gap: 6px;
+  width: 100%;
+  padding: 12px 12px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.formula-card:hover,
+.formula-card:focus-visible {
+  border-color: var(--primary);
+  background: rgba(123, 227, 255, 0.08);
+}
+
+.formula-card strong {
+  font-size: 0.96rem;
+}
+
+.formula-card small {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.formula-category {
+  color: var(--primary);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.formula-overview {
+  margin-bottom: 14px;
+}
+
+.formula-overview h2 {
+  font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+  margin-bottom: 6px;
+}
+
+.formula-overview p {
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.6;
 }
 
 .formula-inputs {
   display: grid;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 18px;
 }
 
-.formula-inputs label {
+.field-group {
   display: grid;
   gap: 6px;
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+}
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.calculate-formula-button,
+.secondary-button {
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text);
+}
+
+.calculate-formula-button {
+  flex: 1;
+  background: rgba(123, 227, 255, 0.16);
+}
+
+.secondary-button {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.calculate-formula-button:hover,
+.secondary-button:hover {
+  border-color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .formula-result-box {
@@ -153,18 +251,31 @@ option {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 14px;
+  padding: 14px 16px;
+}
+
+.formula-result-box h3 {
+  margin-bottom: 10px;
 }
 
 .formula-text {
   color: var(--muted);
-  margin: 0 0 8px;
+  margin: 0 0 18px;
+  line-height: 1.5;
 }
 
 .answer-text {
   margin: 0;
-  font-size: clamp(1.1rem, 2vw, 1.7rem);
-  font-weight: 700;
+  font-size: clamp(1.2rem, 2vw, 1.8rem);
+  line-height: 1.4;
+}
+
+.empty-state {
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  text-align: center;
 }
 
 @media (max-width: 780px) {
@@ -175,5 +286,9 @@ option {
   .tool-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .action-row {
+    flex-direction: column;
   }
 }

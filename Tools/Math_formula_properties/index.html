@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#0b2b1c" />
   <link rel="manifest" href="../../manifest.webmanifest" />
   <link rel="icon" type="image/png" href="../../icons/javan.png" />
-  <title>Calculator & Formulas | JavanOffice</title>
+  <title>Math & Formula Calculator | JavanOffice</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -17,36 +17,40 @@
       <a class="back-link" href="../../index.html">← Main menu</a>
       <div class="header-copy">
         <p class="eyebrow">JAVANOFFICE TOOLS</p>
-        <h1>Calculator & Formulas</h1>
+        <h1>Math &amp; Formula Calculator</h1>
       </div>
     </header>
 
     <main class="math-layout">
+      <section class="panel selector-panel">
+        <div class="panel-header">
+          <h2>Formula library</h2>
+        </div>
+
+        <div class="selector-controls">
+          <label class="field-label" for="formulaSearch">Search formulas</label>
+          <input id="formulaSearch" type="search" placeholder="Type a formula or topic..." />
+
+          <label class="field-label" for="formulaCategory">Category</label>
+          <select id="formulaCategory"></select>
+
+          <label class="field-label" for="formulaSelect">Choose a formula</label>
+          <select id="formulaSelect"></select>
+        </div>
+
+        <div id="formulaList" class="formula-list" aria-live="polite"></div>
+      </section>
+
       <section class="panel formula-panel">
-        <h2>Formula calculator</h2>
-        <label class="field-label" for="shapeSelect">Select a formula for...</label>
-        <select id="shapeSelect">
-          <option value="Square">Square</option>
-          <option value="Rectangle">Rectangle</option>
-          <option value="Triangle">Triangle</option>
-          <option value="circle">Circle</option>
-          <option value="cube">Cube</option>
-          <option value="cuboid">Cuboid</option>
-          <option value="sphere">Sphere</option>
-          <option value="cylinder">Cylinder</option>
-          <option value="cone">Cone</option>
-          <option value="quadratic-formula">quadratic-formula</option>
-          <option value="simple-interest">
+        <div id="formulaOverview" class="formula-overview"></div>
 
-          </option>
-        </select>
-
-        <div id="formulaInputs" class="formula-inputs"></div>
+        <div id="formulaInputs" class="formula-inputs" aria-live="polite"></div>
 
         <div class="formula-result-box">
+          <h3>Equation</h3>
+          <p id="formulaFormula" class="formula-text">Choose a formula to begin.</p>
           <h3>Result</h3>
-          <p id="formulaFormula" class="formula-text"></p>
-          <p id="formulaAnswer" class="answer-text">Choose a shape to begin.</p>
+          <p id="formulaAnswer" class="answer-text">Enter values to calculate.</p>
         </div>
       </section>
     </main>
