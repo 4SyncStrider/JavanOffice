@@ -1,9 +1,9 @@
-@font-face{
-    font-family: 'Source Code Pro';
-    font-weight: 700;
-    font-style: normal;
-    font-stretch: normal;
-    src: url('../fonts/SourceCodePro-Bold.otf.woff2') format('woff2');  
+@font-face {
+  font-family: 'Source Code Pro';
+  font-weight: 700;
+  font-style: normal;
+  font-stretch: normal;
+  src: url('../fonts/SourceCodePro-Bold.otf.woff2') format('woff2');
 }
 
 :root {
@@ -184,6 +184,7 @@ pre {
     opacity: 0;
     transform: translateY(16px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -209,6 +210,6 @@ pre {
   }
 
   pre {
-    font-size: large;
+    margin-top: auto;
   }
 }
