@@ -4,12 +4,7 @@
 
 
 
-node_modules/@typescript
-node_modules/.bin
-node_modules/typescript
-node_modules/.package-lock.json
 
-npmPackages/
 
 Chess_test_server/
 
