@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sudoku</title>
+<style>
+  @font-face {
+    font-family: "Source Code Pro";
+    font-weight: 700;
+    font-style: normal;
+    font-stretch: normal;
+    src: url(../../fonts/SourceCodePro-Bold.otf.woff2) format(woff2);
+  }
+  :root { color-scheme: light; --ink: #000; --paper: #fff; --line: #b8b8b8; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; padding: 24px 14px;
+    background: var(--paper); color: var(--ink);
+    font-family:'Source Code Pro', Arial, Helvetica, sans-serif;
+    font-weight: 700;
+    display: flex; justify-content: center; align-items: flex-start;
+  }
+  main { width: min(100%, 520px); }
+  h1 { text-align: center; font-size: 2rem; margin: 0 0 8px; letter-spacing: .04em; }
+  .subtitle { text-align: center; margin: 0 0 20px; color: #333; }
+  .toolbar { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--paper);
+    border: 1px solid var(--ink); border-radius: 4px; padding: 9px 12px;
+    cursor: pointer;
+  }
+  button:hover, select:hover { background: #f0f0f0; }
+  button:focus-visible, select:focus-visible, .cell:focus-visible { outline: 2px solid #000; outline-offset: 2px; }
+  #board {
+    width: 100%; aspect-ratio: 1; display: grid;
+    grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr);
+    border: 2px solid #000; background: #fff;
+  }
+  .cell {
+    min-width: 0; min-height: 0; border: 0; border-radius: 0;
+    border-right: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    padding: 0; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(15px, 4.5vw, 25px); background: #fff; cursor: pointer;
+    user-select: none;
+  }
+  .cell:nth-child(3n) { border-right: 2px solid #000; }
+  .cell:nth-child(9n) { border-right: 0; }
+  .cell:nth-child(n+19):nth-child(-n+27),
+  .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid #000; }
+  .cell:nth-child(n+73) { border-bottom: 0; }
+  .cell.given { font-weight: 700; }
+  .cell.selected { background: #e8e8e8; box-shadow: inset 0 0 0 2px #000; }
+  .cell.peer { background: #f5f5f5; }
+  .cell.same-number { background: #dedede; }
+  .cell.conflict { color: #000; text-decoration: underline wavy; text-decoration-thickness: 1px; }
+  .cell:not(.given) { color: #333; }
+  .numbers { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; margin: 12px 0; }
+  .numbers button { padding: 10px 0; font-size: 1.1rem; }
+  .numbers button:disabled { opacity: .35; cursor: not-allowed; }
+  .status { min-height: 1.5em; text-align: center; margin: 10px 0; }
+  .help { font-size: .9rem; color: #333; line-height: 1.45; text-align: center; margin-top: 12px; }
+  .bottom { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  @media (max-width: 380px) {
+    body { padding: 18px 8px; }
+    .cell { font-size: 15px; }
+    button, select { padding: 8px 9px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sudoku</h1>
+  <button type="button" style="background-color: seagreen; color: white">Back</button>
+  <p class="subtitle">A classic number puzzle.</p>
+  <div class="toolbar">
+    <label for="difficulty" style="align-self:center">Difficulty</label>
+    <select id="difficulty" aria-label="Difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+    <button id="newGame">New game</button>
+  </div>
+  <div id="board" role="grid" aria-label="Sudoku board"></div>
+  <div class="numbers" aria-label="Enter a number">
+    <button data-number="1">1</button><button data-number="2">2</button>
+    <button data-number="3">3</button><button data-number="4">4</button>
+    <button data-number="5">5</button><button data-number="6">6</button>
+    <button data-number="7">7</button><button data-number="8">8</button>
+    <button data-number="9">9</button>
+  </div>
+  <div class="bottom">
+    <button id="erase">Erase</button>
+    <button id="check">Check puzzle</button>
+    <button id="reset">Restart</button>
+  </div>
+  <p class="status" id="status" role="status" aria-live="polite">Select an empty square, then enter a number.</p>
+  <p class="help">Use the number buttons or your keyboard (1–9). Arrow keys move between squares; Backspace or Delete erases a square. Bold numbers are clues and cannot be changed.</p>
+</main>
+<script>
+(() => {
+  const boardEl = document.getElementById('board');
+  const statusEl = document.getElementById('status');
+  const difficultyEl = document.getElementById('difficulty');
+  let solution = [], puzzle = [], values = [], selected = 0;
+
+  function shuffled(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function valid(grid, row, col, n) {
+    for (let i = 0; i < 9; i++) {
+      if (grid[row * 9 + i] === n || grid[i * 9 + col] === n) return false;
+    }
+    const r0 = Math.floor(row / 3) * 3, c0 = Math.floor(col / 3) * 3;
+    for (let r = r0; r < r0 + 3; r++)
+      for (let c = c0; c < c0 + 3; c++)
+        if (grid[r * 9 + c] === n) return false;
+    return true;
+  }
+  function fillGrid(grid) {
+    const idx = grid.indexOf(0);
+    if (idx === -1) return true;
+    const row = Math.floor(idx / 9), col = idx % 9;
+    for (const n of shuffled([1,2,3,4,5,6,7,8,9])) {
+      if (valid(grid, row, col, n)) {
+        grid[idx] = n;
+        if (fillGrid(grid)) return true;
+        grid[idx] = 0;
+      }
+    }
+    return false;
+  }
+  function createGame() {
+    solution = Array(81).fill(0);
+    fillGrid(solution);
+    puzzle = solution.slice();
+    const blanks = { easy: 34, medium: 44, hard: 52 }[difficultyEl.value] || 44;
+    for (const idx of shuffled([...Array(81).keys()]).slice(0, blanks)) puzzle[idx] = 0;
+    values = puzzle.slice();
+    selected = values.findIndex(v => v === 0);
+    if (selected < 0) selected = 0;
+    render();
+    statusEl.textContent = 'New puzzle generated.';
+  }
+  function render() {
+    boardEl.innerHTML = '';
+    for (let i = 0; i < 81; i++) {
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'cell' + (puzzle[i] ? ' given' : '');
+      cell.setAttribute('role', 'gridcell');
+      cell.setAttribute('aria-label', `Row ${Math.floor(i/9)+1}, column ${i%9+1}${values[i] ? ', '+values[i] : ', empty'}${puzzle[i] ? ', clue' : ''}`);
+      cell.textContent = values[i] || '';
+      cell.dataset.index = i;
+      cell.addEventListener('click', () => { selected = i; render(); });
+      boardEl.appendChild(cell);
+    }
+    updateHighlights();
+    document.querySelectorAll('[data-number]').forEach(b => b.disabled = !!puzzle[selected]);
+  }
+  function updateHighlights() {
+    const cells = [...boardEl.children];
+    const sr = Math.floor(selected / 9), sc = selected % 9, val = values[selected];
+    cells.forEach((cell, i) => {
+      const r = Math.floor(i / 9), c = i % 9;
+      if (i === selected) cell.classList.add('selected');
+      else if (r === sr || c === sc || (Math.floor(r/3) === Math.floor(sr/3) && Math.floor(c/3) === Math.floor(sc/3))) cell.classList.add('peer');
+      if (val && values[i] === val) cell.classList.add('same-number');
+    });
+    document.querySelectorAll('[data-number]').forEach(b => b.disabled = !!puzzle[selected]);
+  }
+  function enterNumber(n) {
+    if (selected < 0 || puzzle[selected]) return;
+    values[selected] = n;
+    render();
+    statusEl.textContent = 'Number entered.';
+    if (values.every((v, i) => v === solution[i])) statusEl.textContent = 'Puzzle solved. Good job!';
+  }
+  function erase() {
+    if (selected < 0 || puzzle[selected]) return;
+    values[selected] = 0;
+    render();
+    statusEl.textContent = 'Square cleared.';
+  }
+  document.querySelectorAll('[data-number]').forEach(b => b.addEventListener('click', () => enterNumber(Number(b.dataset.number))));
+  document.getElementById('erase').addEventListener('click', erase);
+  document.getElementById('newGame').addEventListener('click', createGame);
+  document.getElementById('reset').addEventListener('click', () => {
+    values = puzzle.slice(); render(); statusEl.textContent = 'Puzzle restarted.';
+  });
+  document.getElementById('check').addEventListener('click', () => {
+    const wrong = values.some((v, i) => v !== 0 && v !== solution[i]);
+    const empty = values.some(v => v === 0);
+    if (wrong) statusEl.textContent = 'Some numbers are incorrect, check the underlined squares.';
+    else if (empty) statusEl.textContent = 'There are still some empty squares.';
+    else statusEl.textContent = 'Puzzle solved. Good job!';
+    [...boardEl.children].forEach((cell, i) => {
+      cell.classList.toggle('conflict', values[i] !== 0 && values[i] !== solution[i]);
+    });
+  });
+  document.addEventListener('keydown', e => {
+    if (['INPUT','SELECT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+    if (/^[1-9]$/.test(e.key)) { e.preventDefault(); enterNumber(Number(e.key)); }
+    else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') { e.preventDefault(); erase(); }
+    else {
+      let next = selected;
+      if (e.key === 'ArrowUp') next = Math.max(0, selected - 9);
+      else if (e.key === 'ArrowDown') next = Math.min(80, selected + 9);
+      else if (e.key === 'ArrowLeft') next = Math.max(0, selected - 1);
+      else if (e.key === 'ArrowRight') next = Math.min(80, selected + 1);
+      else return;
+      e.preventDefault(); selected = next; render();
+      boardEl.children[selected].focus();
+    }
+  });
+  createGame();
+})();
+</script>
+</body>
+</html>
