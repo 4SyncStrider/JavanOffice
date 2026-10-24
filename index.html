@@ -87,7 +87,7 @@
     <script type="module" src="menu/menu.js"></script>
     <script type="module" src="pwa-register.js"></script>
     <script type="module">
-      import OpenCC from "./node_modules/opencc-js/dist/esm/full.js";
+      import OpenCC from "./full.js"
       
       const convertor = OpenCC.Converter({from: 'cn', to: 'tw'});
       console.log(convertor("汉字"))
