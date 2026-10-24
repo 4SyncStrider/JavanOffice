@@ -146,6 +146,7 @@ function formatNumber(value) {
 
 function renderFormulaInputs() {
   const key = shapeSelect.value;
+  console.log(key);
   const definition = definitions[key];
 
   formulaInputs.innerHTML = "";
