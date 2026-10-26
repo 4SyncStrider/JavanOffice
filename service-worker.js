@@ -23,6 +23,7 @@ const APP_SHELL = [
   "./Tools/Math_formula_properties/index.html",
   "./Tools/Math_formula_properties/style.css",
   "./Tools/Math_formula_properties/formulas.js",
+  "./Tools/Math_formula_properties/Math.js",
   "./GAmes/Flappy-bird/index.html",
   "./GAmes/Flappy-bird/style.css",
   "./GAmes/Flappy-bird/script.js",
@@ -73,6 +74,7 @@ const APP_SHELL = [
   "./GAmes/Google_dino/public/assests/reach.m4a",
   "./GAmes/Google_dino/public/assests/restart.png",
   "./GAmes/Google_dino/public/assests/restart-white.png",
+  "./GAmes/Sudoku/Sudoku.html"
 ];
 
 self.addEventListener("install", (event) => {
