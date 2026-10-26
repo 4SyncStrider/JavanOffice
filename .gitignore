@@ -11,6 +11,11 @@ test.js
 instruction.md
 JavanOffice/
 
+node_modules/.package-lock.json
+
 node_modules/
 
+package-lock.json
 
+
+node_modules/opencc-js
