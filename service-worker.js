@@ -74,7 +74,10 @@ const APP_SHELL = [
   "./GAmes/Google_dino/public/assests/reach.m4a",
   "./GAmes/Google_dino/public/assests/restart.png",
   "./GAmes/Google_dino/public/assests/restart-white.png",
-  "./GAmes/Sudoku/Sudoku.html"
+  "./GAmes/Sudoku/Sudoku.html",
+  "./GAmes/HumanBenchmark/Game.js",
+  "./GAmes/HumanBenchmark/index.html",
+  "./GAmes/HumanBenchmark/styles.css"
 ];
 
 self.addEventListener("install", (event) => {
