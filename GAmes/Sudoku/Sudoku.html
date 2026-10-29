@@ -4,6 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="../../icons/javan.png" type="image/png">
   <title>Sudoku | JavanOffice</title>
   <style>
     @font-face {
@@ -69,8 +70,8 @@
     button,
     select {
       font: inherit;
-      color: var(--ink2);
-      background: var(--button-bg);
+      color: var(--ink);
+      background: var(--paper);
       border: 1px solid var(--ink);
       border-radius: 4px;
       padding: 9px 12px;
@@ -96,7 +97,7 @@
       grid-template-columns: repeat(9, 1fr);
       grid-template-rows: repeat(9, 1fr);
       border: 2px solid #000;
-      background: var(--button-bg);
+      background: #fff;
     }
 
     .cell {
@@ -111,7 +112,7 @@
       align-items: center;
       justify-content: center;
       font-size: clamp(15px, 4.5vw, 25px);
-      background: var(--button-bg);
+      background: #fff;
       cursor: pointer;
       user-select: none;
     }
@@ -138,16 +139,16 @@
     }
 
     .cell.selected {
-      background: #135033;
+      background: #e8e8e8;
       box-shadow: inset 0 0 0 2px #000;
     }
 
     .cell.peer {
-      background: #46bd83d4;
+      background: #767474;
     }
 
     .cell.same-number {
-      background: #135033;
+      background: #dedede;
     }
 
     .cell.conflict {
@@ -157,7 +158,7 @@
     }
 
     .cell:not(.given) {
-      color: rgb(184, 65, 44);
+      color: #333;
     }
 
     .numbers {
