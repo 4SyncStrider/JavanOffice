@@ -75,9 +75,10 @@ const APP_SHELL = [
   "./GAmes/Google_dino/public/assests/restart.png",
   "./GAmes/Google_dino/public/assests/restart-white.png",
   "./GAmes/Sudoku/Sudoku.html",
-  "./GAmes/HumanBenchmark/Game.js",
   "./GAmes/HumanBenchmark/index.html",
-  "./GAmes/HumanBenchmark/styles.css"
+  "./GAmes/HumanBenchmark/styles.css",
+  "./GAmes/HumanBenchmark/game.js",
+  "./phaser/phaser.min.js"
 ];
 
 self.addEventListener("install", (event) => {
