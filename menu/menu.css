@@ -175,8 +175,15 @@ h2 {
   text-align: center;
 }
 
-pre {
+.info-container {
   padding: 35px;
+  background-color: #0b2b1c;
+  border-radius: 35px;
+  border: none;
+}
+
+.info-container a { 
+  color: inherit;
 }
 
 @keyframes fadeIn {
