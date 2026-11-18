@@ -1,6 +1,7 @@
-if ("serviceWorker" in navigator) {
+if ("serviceWorker" in navigator && !import.meta.env.DEV) {
   window.addEventListener("load", () => {
-    const appRoot = new URL("./", import.meta.url);
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    const appRoot = new URL("./", manifestLink.href);
     const serviceWorkerUrl = new URL("service-worker.js", appRoot);
 
     navigator.serviceWorker

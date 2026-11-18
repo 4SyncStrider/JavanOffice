@@ -2,8 +2,7 @@
 
 .gitignore
 
-
-
+dist/
 
 
 test.js

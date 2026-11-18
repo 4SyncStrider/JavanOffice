@@ -1,9 +1,8 @@
-const CACHE_NAME = "javanoffice-pwa-v8";
+const CACHE_NAME = "javanoffice-pwa-v9";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./pwa-register.js",
   "./service-worker.js",
   "./icons/icon-192.svg",
   "./icons/icon-512.svg",
@@ -12,33 +11,22 @@ const APP_SHELL = [
   "./fonts/SourceCodePro-Bold.otf.woff2",
   "./fonts/SourceCodePro-Regular.otf.woff2",
   "./fonts/SourceCodeVF-Italic.otf.woff2",
-  "./menu/menu.css",
-  "./menu/menu.js",
   "./Tools/to-do/index.html",
-  "./Tools/to-do/style.css",
   "./Tools/to-do/script.js",
-  "./Tools/简体繁体2/full.js",
   "./Tools/简体繁体2/index.html",
-  "./Tools/简体繁体2/style.css",
   "./Tools/Math_formula_properties/index.html",
-  "./Tools/Math_formula_properties/style.css",
-  "./Tools/Math_formula_properties/formulas.js",
-  "./Tools/Math_formula_properties/Math.js",
   "./GAmes/Flappy-bird/index.html",
-  "./GAmes/Flappy-bird/style.css",
   "./GAmes/Flappy-bird/script.js",
+  "./GAmes/phaser/phaser.min.js",
   "./GAmes/Flappy-bird/assets/back.png",
   "./GAmes/Flappy-bird/assets/background-day.png",
   "./GAmes/Flappy-bird/assets/background-night.png",
   "./GAmes/Flappy-bird/assets/pipe-green.png",
   "./GAmes/Flappy-bird/assets/yellowbird-upflap.png",
   "./GAmes/Google_dino/index.html",
-  "./GAmes/Google_dino/phaser.min.js",
-  "./GAmes/Google_dino/public/style.css",
   "./GAmes/Google_dino/src/scences/Game.js",
   "./GAmes/Google_dino/src/main.js",
   "./GAmes/Chess/index.html",
-  "./GAmes/Chess/style.css",
   "./GAmes/Chess/script.js",
   "./GAmes/Chess/xiangqi.js",
   "./GAmes/Chess/images/Background-image.jpg",
@@ -76,23 +64,32 @@ const APP_SHELL = [
   "./GAmes/Google_dino/public/assests/restart-white.png",
   "./GAmes/Sudoku/Sudoku.html",
   "./GAmes/HumanBenchmark/index.html",
-  "./GAmes/HumanBenchmark/styles.css",
   "./GAmes/HumanBenchmark/game.js",
-  "./phaser/phaser.min.js"
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) =>
-        cache.addAll(
-          APP_SHELL.map(
-            (path) => new Request(new URL(path, self.registration.scope), { cache: "reload" })
-          )
+    (async () => {
+      const manifestUrl = new URL(".vite/manifest.json", self.registration.scope);
+      const response = await fetch(manifestUrl);
+      if (!response.ok) {
+        throw new Error(`Could not load Vite asset manifest: ${response.status}`);
+      }
+      const manifest = await response.json();
+      const builtFiles = Object.values(manifest).flatMap(({ file, css = [], assets = [] }) => [
+        file,
+        ...css,
+        ...assets,
+      ]);
+      const paths = [...new Set([...APP_SHELL, ...builtFiles])];
+      const cache = await caches.open(CACHE_NAME);
+      await cache.addAll(
+        paths.map(
+          (path) => new Request(new URL(path, self.registration.scope), { cache: "reload" })
         )
-      )
-      .then(() => self.skipWaiting())
+      );
+      await self.skipWaiting();
+    })()
   );
 });
 

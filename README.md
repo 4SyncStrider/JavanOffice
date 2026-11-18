@@ -10,17 +10,25 @@ JavanOffice is a lightweight browser-based toolkit and game hub built with HTML,
 - Calculator and formula helper
 - Existing browser games preserved and integrated into the main menu
 
-## Open the project
+## Run and build the project
 
-For regular use, you can open the root file directly:
+Install the dependencies and start Vite's development server:
 
-- index.html
+```sh
+npm install
+npm run dev
+```
+
+Vite serves all tools and games as separate pages. Create a production build with
+`npm run build`, then use `npm run preview` to test the built site locally.
 
 ## Progressive Web App
 
 JavanOffice includes a web app manifest and a service worker that caches the site pages and local game assets for offline use. To install the app or enable offline support, serve the project from `localhost` or an HTTPS host; browsers do not enable service workers for `file://` pages.
 
-For example, run a local static server from the project root with `npx serve .`, then open the URL it prints. The browser's install command appears when its PWA install criteria are met.
+The production build includes the Vite-generated bundles in the service worker's
+precache. The browser's install command appears when its PWA install criteria
+are met.
 
 ## Notes
 
