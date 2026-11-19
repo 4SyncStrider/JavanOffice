@@ -23,7 +23,7 @@ const staticFiles = [
   "GAmes/Flappy-bird/script.js",
   "GAmes/Chess/xiangqi.js",
   "GAmes/Chess/script.js",
-  "GAmes/HumanBenchmark/game.js",
+  "GAmes/HumanBenchmark/Game.js",
   "Tools/to-do/script.js",
 ];
 
