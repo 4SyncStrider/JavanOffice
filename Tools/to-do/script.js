@@ -9,6 +9,7 @@ const STORAGE_KEY = "javanoffice.todo.lists.v1";
 const state = {
   lists: loadLists(),
   selectedId: null,
+  editingListId: null,
 };
 
 const listTabsElement = document.querySelector("#listTabs");
@@ -20,6 +21,13 @@ const emptyState = document.querySelector("#emptyState");
 const newListButton = document.querySelector("#newListButton");
 const renameListButton = document.querySelector("#renameListButton");
 const deleteListButton = document.querySelector("#deleteListButton");
+const listDeleteConfirmModal = document.querySelector("#listDeleteConfirmModal");
+const listDeleteConfirmTitle = document.querySelector("#listDeleteConfirmTitle");
+const listDeleteConfirmMessage = document.querySelector("#listDeleteConfirmMessage");
+const cancelListDeleteButton = document.querySelector("#cancelListDeleteButton");
+const confirmListDeleteButton = document.querySelector("#confirmListDeleteButton");
+let pendingDeleteListId = null;
+let deleteConfirmationTrigger = null;
 
 function generateId(prefix = "id") {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
@@ -78,18 +86,62 @@ function getSelectedList() {
   return state.lists.find((list) => list.id === state.selectedId) || state.lists[0];
 }
 
+function createListTab(list) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `list-tab${list.id === state.selectedId ? " active" : ""}`;
+  button.textContent = list.name;
+  button.setAttribute("aria-pressed", String(list.id === state.selectedId));
+  button.addEventListener("click", () => selectList(list.id));
+  return button;
+}
+
+function finishListNameEdit(list, input) {
+  if (state.editingListId !== list.id) return;
+  list.name = input.value.trim() || input.dataset.originalName;
+  state.editingListId = null;
+  saveLists();
+  if (list.id === state.selectedId) currentListTitle.textContent = list.name;
+  input.replaceWith(createListTab(list));
+}
+
 function renderListTabs() {
   listTabsElement.innerHTML = "";
 
   state.lists.forEach((list) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `list-tab${list.id === state.selectedId ? " active" : ""}`;
-    button.textContent = list.name;
-    button.setAttribute("aria-pressed", String(list.id === state.selectedId));
-    button.addEventListener("click", () => selectList(list.id));
-    listTabsElement.appendChild(button);
+    if (list.id !== state.editingListId) {
+      listTabsElement.appendChild(createListTab(list));
+      return;
+    }
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = `list-tab list-tab-editor${list.id === state.selectedId ? " active" : ""}`;
+    input.value = list.name;
+    input.maxLength = 80;
+    input.dataset.originalName = list.name;
+    input.setAttribute("aria-label", `List name: ${list.name}`);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        input.blur();
+      } else if (event.key === "Escape") {
+        event.preventDefault();
+        input.value = input.dataset.originalName;
+        input.blur();
+      }
+    });
+    input.addEventListener("blur", () => finishListNameEdit(list, input));
+    listTabsElement.appendChild(input);
   });
+}
+
+function beginListNameEdit(listId) {
+  state.editingListId = listId;
+  renderListTabs();
+  const input = listTabsElement.querySelector(".list-tab-editor");
+  input.focus();
+  input.select();
 }
 
 function renderTasks() {
@@ -170,57 +222,87 @@ function render() {
 }
 
 newListButton.addEventListener("click", () => {
-  const name = window.prompt("Name your new list:", `List ${state.lists.length + 1}`);
-  if (name === null) return;
-  const cleaned = name.trim();
-  if (!cleaned) {
-    window.alert("List name cannot be empty.");
-    return;
-  }
-
-  const newList = createList(cleaned);
+  const newList = createList(`List ${state.lists.length + 1}`);
   state.lists.push(newList);
   state.selectedId = newList.id;
+  state.editingListId = newList.id;
   saveLists();
   render();
+  const input = listTabsElement.querySelector(".list-tab-editor");
+  input.focus();
+  input.select();
 });
 
 renameListButton.addEventListener("click", () => {
-  const list = getSelectedList();
-  const nextName = window.prompt("Rename list:", list.name);
-  if (nextName === null) return;
-  const cleaned = nextName.trim();
-  if (!cleaned) {
-    window.alert("List name cannot be empty.");
-    return;
-  }
-
-  list.name = cleaned;
-  saveLists();
-  render();
+  beginListNameEdit(getSelectedList().id);
 });
 
-deleteListButton.addEventListener("click", () => {
-  if (state.lists.length === 1) {
-    const confirmed = window.confirm(
-      "This is your only list. Delete it and create a fresh empty list?"
-    );
-    if (!confirmed) return;
-    state.lists = [createList("My list")];
-    state.selectedId = state.lists[0].id;
-    saveLists();
-    render();
+function closeListDeleteConfirmation(returnFocus = true) {
+  listDeleteConfirmModal.hidden = true;
+  pendingDeleteListId = null;
+  document.removeEventListener("keydown", handleListDeleteDialogKeydown);
+  if (returnFocus) deleteConfirmationTrigger?.focus();
+  deleteConfirmationTrigger = null;
+}
+
+function handleListDeleteDialogKeydown(event) {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeListDeleteConfirmation();
     return;
   }
 
-  const list = getSelectedList();
-  const confirmed = window.confirm(`Delete “${list.name}”? This cannot be undone.`);
-  if (!confirmed) return;
+  if (event.key === "Tab") {
+    event.preventDefault();
+    const nextButton = event.shiftKey
+      ? document.activeElement === cancelListDeleteButton
+        ? confirmListDeleteButton
+        : cancelListDeleteButton
+      : document.activeElement === confirmListDeleteButton
+        ? cancelListDeleteButton
+        : confirmListDeleteButton;
+    nextButton.focus();
+  }
+}
 
-  state.lists = state.lists.filter((entry) => entry.id !== list.id);
-  state.selectedId = state.lists[0].id;
+deleteListButton.addEventListener("click", () => {
+  const list = getSelectedList();
+  pendingDeleteListId = list.id;
+  deleteConfirmationTrigger = deleteListButton;
+  const isOnlyList = state.lists.length === 1;
+  listDeleteConfirmTitle.textContent = isOnlyList
+    ? "Delete the only list?"
+    : `Delete "${list.name}"?`;
+  listDeleteConfirmMessage.textContent = isOnlyList
+    ? `Deleting "${list.name}" will remove its tasks and create a fresh empty list.`
+    : "This list and its tasks will be permanently deleted.";
+  confirmListDeleteButton.textContent = isOnlyList ? "Delete and replace" : "Delete list";
+  listDeleteConfirmModal.hidden = false;
+  cancelListDeleteButton.focus();
+  document.addEventListener("keydown", handleListDeleteDialogKeydown);
+});
+
+cancelListDeleteButton.addEventListener("click", () => closeListDeleteConfirmation());
+confirmListDeleteButton.addEventListener("click", () => {
+  const list = state.lists.find((entry) => entry.id === pendingDeleteListId);
+  const isOnlyList = state.lists.length === 1;
+  closeListDeleteConfirmation(false);
+  if (!list) return;
+
+  if (isOnlyList) {
+    state.lists = [createList("My list")];
+    state.selectedId = state.lists[0].id;
+  } else {
+    state.lists = state.lists.filter((entry) => entry.id !== list.id);
+    state.selectedId = state.lists[0].id;
+  }
   saveLists();
   render();
+  listTabsElement.querySelector(".active")?.focus();
+});
+
+listDeleteConfirmModal.addEventListener("click", (event) => {
+  if (event.target === listDeleteConfirmModal) closeListDeleteConfirmation();
 });
 
 taskForm.addEventListener("submit", (event) => {

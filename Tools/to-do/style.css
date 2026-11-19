@@ -126,6 +126,16 @@ input {
   outline: none;
 }
 
+.list-tab-editor {
+  color: var(--text);
+  cursor: text;
+}
+
+.list-tab-editor:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
 .task-form {
   display: flex;
   gap: 10px;
@@ -243,6 +253,42 @@ input {
   padding: 18px;
   text-align: center;
   color: var(--muted);
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(3, 16, 9, 0.76);
+}
+
+.modal[hidden] {
+  display: none;
+}
+
+.modal-content {
+  width: min(100%, 440px);
+  padding: 28px 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  color: var(--text);
+  background: var(--panel-bg);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
+}
+
+.modal-content h2 {
+  margin: 0 0 10px;
+  font-size: clamp(1.5rem, 5vw, 2.3rem);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 22px;
 }
 
 .sr-only {

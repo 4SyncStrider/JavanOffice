@@ -42,13 +42,14 @@ const message = document.querySelector("#message");
 const promotionModal = document.querySelector("#promotionModal");
 const promotionChoices = document.querySelector("#promotionChoices");
 const gameOverModal = document.querySelector("#gameOverModal");
+const mainMenuLink = document.querySelector(".menu-link");
 const gameTitle = document.querySelector("#gameTitle");
 const switchVariantButton = document.querySelector("#switchVariantButton");
-const variantConfirmModal = document.querySelector("#variantConfirmModal");
-const variantConfirmTitle = document.querySelector("#variantConfirmTitle");
-const variantConfirmMessage = document.querySelector("#variantConfirmMessage");
-const cancelVariantButton = document.querySelector("#cancelVariantButton");
-const confirmVariantButton = document.querySelector("#confirmVariantButton");
+const gameActionConfirmModal = document.querySelector("#gameActionConfirmModal");
+const gameActionConfirmTitle = document.querySelector("#gameActionConfirmTitle");
+const gameActionConfirmMessage = document.querySelector("#gameActionConfirmMessage");
+const cancelGameActionButton = document.querySelector("#cancelGameActionButton");
+const confirmGameActionButton = document.querySelector("#confirmGameActionButton");
 const riverLabel = document.querySelector("#riverLabel");
 const XIANGQI_PIECES = {
   red: { k: "帥", a: "仕", e: "相", h: "馬", r: "車", c: "砲", s: "兵" },
@@ -59,7 +60,8 @@ let xiangqiState = XiangqiEngine.createInitialState();
 let xiangqiMatchStatus = "notStarted";
 let xiangqiSelected = null;
 let xiangqiLegalMoves = [];
-let pendingVariant = null;
+let pendingGameAction = null;
+let confirmationTrigger = null;
 
 function createPiece(color, type, moved = false) {
   return { color, type, moved };
@@ -739,66 +741,96 @@ function switchVariant(variant) {
   if (activeVariant === "xiangqi") renderXiangqiBoard();
 }
 
-function closeVariantConfirmation(returnFocus = true) {
-  variantConfirmModal.hidden = true;
-  pendingVariant = null;
-  document.removeEventListener("keydown", handleVariantDialogKeydown);
-  if (returnFocus) switchVariantButton.focus();
+function closeGameActionConfirmation(returnFocus = true) {
+  gameActionConfirmModal.hidden = true;
+  pendingGameAction = null;
+  document.removeEventListener("keydown", handleGameActionDialogKeydown);
+  if (returnFocus) confirmationTrigger?.focus();
+  confirmationTrigger = null;
 }
 
-function handleVariantDialogKeydown(event) {
+function handleGameActionDialogKeydown(event) {
   if (event.key === "Escape") {
     event.preventDefault();
-    closeVariantConfirmation();
+    closeGameActionConfirmation();
     return;
   }
   if (event.key === "Tab") {
     const focusedElement = document.activeElement;
     event.preventDefault();
     const nextButton = event.shiftKey
-      ? focusedElement === cancelVariantButton
-        ? confirmVariantButton
-        : cancelVariantButton
-      : focusedElement === confirmVariantButton
-        ? cancelVariantButton
-        : confirmVariantButton;
+      ? focusedElement === cancelGameActionButton
+        ? confirmGameActionButton
+        : cancelGameActionButton
+      : focusedElement === confirmGameActionButton
+        ? cancelGameActionButton
+        : confirmGameActionButton;
     nextButton.focus();
   }
 }
 
-function requestVariantSwitch() {
-  if (!variantConfirmModal.hidden) return;
+function getActiveMatchStatus() {
+  return activeVariant === "english" ? state.matchStatus : xiangqiMatchStatus;
+}
+
+function requestGameActionConfirmation(action, trigger) {
+  if (!gameActionConfirmModal.hidden) return;
+
+  confirmationTrigger = trigger;
+  pendingGameAction = action;
+  if (action.type === "switchVariant") {
+    const targetName = action.target === "english" ? "English Chess" : "Chinese Chess";
+    const currentName = activeVariant === "english" ? "An English Chess" : "A Chinese Chess";
+    gameActionConfirmModal.querySelector(".eyebrow").textContent = "CHANGE GAME";
+    gameActionConfirmTitle.textContent = `Switch to ${targetName}?`;
+    gameActionConfirmMessage.textContent = `${currentName} match is currently in progress. Switching games will end the current match and discard its current board position. Do you want to continue?`;
+    confirmGameActionButton.textContent = "Switch Game";
+  } else {
+    const currentName = activeVariant === "english" ? "An English Chess" : "A Chinese Chess";
+    gameActionConfirmModal.querySelector(".eyebrow").textContent = "LEAVE GAME";
+    gameActionConfirmTitle.textContent = "Return to the main menu?";
+    gameActionConfirmMessage.textContent = `${currentName} match is currently in progress. Leaving will end the current match and discard its current board position. Do you want to continue?`;
+    confirmGameActionButton.textContent = "Leave Game";
+  }
+
+  gameActionConfirmModal.hidden = false;
+  cancelGameActionButton.focus();
+  document.addEventListener("keydown", handleGameActionDialogKeydown);
+}
+
+function requestVariantSwitch(event) {
+  if (!gameActionConfirmModal.hidden) return;
   const target = activeVariant === "english" ? "xiangqi" : "english";
-  const matchStatus = activeVariant === "english" ? state.matchStatus : xiangqiMatchStatus;
-  if (matchStatus !== "inProgress") {
+  if (getActiveMatchStatus() !== "inProgress") {
     switchVariant(target);
     return;
   }
-
-  const targetName = target === "english" ? "English Chess" : "Chinese Chess";
-  const currentName = activeVariant === "english" ? "An English Chess" : "A Chinese Chess";
-  pendingVariant = target;
-  variantConfirmTitle.textContent = `Switch to ${targetName}?`;
-  variantConfirmMessage.textContent = `${currentName} match is currently in progress. Switching games will end the current match and discard its current board position. Do you want to continue?`;
-  variantConfirmModal.hidden = false;
-  cancelVariantButton.focus();
-  document.addEventListener("keydown", handleVariantDialogKeydown);
+  requestGameActionConfirmation({ type: "switchVariant", target }, event.currentTarget);
 }
 
 document.querySelector("#resetButton").addEventListener("click", startNewGame);
 document.querySelector("#modalResetButton").addEventListener("click", startNewGame);
 document.querySelector("#gameOverSwitchButton").addEventListener("click", requestVariantSwitch);
 switchVariantButton.addEventListener("click", requestVariantSwitch);
-cancelVariantButton.addEventListener("click", () => closeVariantConfirmation());
-confirmVariantButton.addEventListener("click", () => {
-  if (!pendingVariant) return;
-  const target = pendingVariant;
-  closeVariantConfirmation(false);
-  switchVariant(target);
-  switchVariantButton.focus();
+mainMenuLink.addEventListener("click", (event) => {
+  if (getActiveMatchStatus() !== "inProgress") return;
+  event.preventDefault();
+  requestGameActionConfirmation({ type: "exit" }, mainMenuLink);
 });
-variantConfirmModal.addEventListener("click", (event) => {
-  if (event.target === variantConfirmModal) closeVariantConfirmation();
+cancelGameActionButton.addEventListener("click", () => closeGameActionConfirmation());
+confirmGameActionButton.addEventListener("click", () => {
+  const action = pendingGameAction;
+  if (!action) return;
+  closeGameActionConfirmation(false);
+  if (action.type === "switchVariant") {
+    switchVariant(action.target);
+    switchVariantButton.focus();
+  } else {
+    window.location.href = mainMenuLink.href;
+  }
+});
+gameActionConfirmModal.addEventListener("click", (event) => {
+  if (event.target === gameActionConfirmModal) closeGameActionConfirmation();
 });
 
 updateVariantInterface();

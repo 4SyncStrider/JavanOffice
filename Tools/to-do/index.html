@@ -59,6 +59,28 @@
       </main>
     </div>
 
+    <div id="listDeleteConfirmModal" class="modal" hidden>
+      <section
+        class="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="listDeleteConfirmTitle"
+        aria-describedby="listDeleteConfirmMessage"
+      >
+        <p class="eyebrow">DELETE LIST</p>
+        <h2 id="listDeleteConfirmTitle">Delete list?</h2>
+        <p id="listDeleteConfirmMessage"></p>
+        <div class="dialog-actions">
+          <button id="cancelListDeleteButton" class="small-button secondary" type="button">
+            Cancel
+          </button>
+          <button id="confirmListDeleteButton" class="small-button danger" type="button">
+            Delete list
+          </button>
+        </div>
+      </section>
+    </div>
+
     <script type="module" src="script.js"></script>
     <script type="module" src="../../pwa-register.js"></script>
   </body>
